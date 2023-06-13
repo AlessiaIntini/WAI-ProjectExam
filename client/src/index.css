@@ -67,3 +67,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.Bootstrap-Card {
+  width:1000px;
+  border-width: 10px;
+}
