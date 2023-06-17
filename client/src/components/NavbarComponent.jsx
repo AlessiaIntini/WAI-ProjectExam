@@ -1,5 +1,8 @@
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { Navbar, Nav, Form} from 'react-bootstrap';
+import { Navbar, Nav, Form,Button} from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { LogoutButton } from './AuthComponents';
+import { Container } from 'react-bootstrap';
 
 
 function NavBar(props) {
@@ -10,13 +13,12 @@ function NavBar(props) {
     </Navbar.Brand>
     <Nav className="justify-content-end" style={{ width: "100%" }}>
     <Nav.Item>
-    {/* {props.loggedIn ? 
-         <LogoutButton logout={props.handleLogout} /> :
-            <Link to='/login'className='btn btn-outline-light'>Login</Link>
-      } */}
-        { <Nav.Link href="#">
-        <i className="bi bi-person-circle icon-size"/>
-        </Nav.Link> }
+    <Container fluid>
+    {props.loggedIn ? 
+        <LogoutButton logout={props.handleLogout} /> :
+        <Link to='/login' className='btn btn-outline-light'>Login</Link>
+         }
+         </Container>
     </Nav.Item>
     </Nav>
 </Navbar>

@@ -2,18 +2,20 @@
 
 const dayjs=require('dayjs')
 
-function Page(id,title,author,creationDate,publicationDate){
-    this.id=id;
+
+function Block(id_b,type,content,id_page){
+    this.id_b=id_b;
+    this.type=type;
+    this.content=content;
+    this.id_page=id_page;
+}
+function Page(id_p,title,author,creationDate,publicationDate,blocks){
+    this.id_p=id_p;
     this.title=title;
     this.author=author;
     this.creationDate=dayjs(creationDate);
     this.publicationDate=dayjs(publicationDate);
-}
-function Block(id,type,content,id_page){
-    this.id=id;
-    this.type=type;
-    this.content=content;
-    this.id_page=id_page;
+    this.blocks=blocks;
 }
 
 module.exports={Page,Block};

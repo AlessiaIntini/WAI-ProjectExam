@@ -178,5 +178,8 @@
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- marco@polito.it, password (author of three pages)
+-luigi@polito.it , password (author of no page)
+-alessia@polito.it , password (she is an admin)
+-paolo@polito.it, password (author of three pages)
+-luca@polito.it, password (author of three pages)

@@ -10,13 +10,13 @@ export class Page {
    * @param {Date} publicationDate date when page is publicated
    * @param {Block[]} blocks blocks associated with the page
    */
-  constructor(id,title, author, creationDate,publicationDate) {
+  constructor(id,title, author, creationDate,publicationDate,blocks) {
     this.id=id
     this.title = title;
     this.author = author;
     this.creationDate = creationDate;
     this.publicationDate = publicationDate;
-    this.blocks=[];
+    this.blocks=blocks;
 
     this.addBlock=(block)=>{
       this.blocks.push(block);

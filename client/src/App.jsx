@@ -5,12 +5,17 @@ import "./App.css";
 import { useEffect, useState } from 'react'
 import NavBar from "./components/NavbarComponent";
 import PageTable from "./components/PageComponent";
-import { Container, Row, Col, Button } from 'react-bootstrap'
-import {Routes,Route, BrowserRouter} from 'react-router-dom'
+import { Container, Row, Col, Button,Alert } from 'react-bootstrap'
+import {Routes,Route, BrowserRouter,Outlet,Navigate } from 'react-router-dom'
+import SinglePage from "./components/SinglePageComponent";
 import API from './API'
+import NotFound from './components/NotFoundComponent';
+import { LoginForm } from './components/AuthComponents';
 function App() {
   const [pages,setPages]=useState([]);
-  
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [message, setMessage] = useState('');
+
   useEffect(()=>{
     //get all the pages from API
     const getPages=async()=>{
@@ -20,27 +25,59 @@ function App() {
     //call function that just create now
     getPages();
   },[]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await API.getUserInfo(); // we have the user info here
+      setLoggedIn(true);
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = async (credentials) => {
+    try {
+      const user = await API.logIn(credentials);
+      setLoggedIn(true);
+      setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
+    }catch(err) {
+      setMessage({msg: err, type: 'danger'});
+    }
+  };
+
+  const handleLogout = async () => {
+    await API.logOut();
+    setLoggedIn(false);
+    // clean up everything
+    setMessage('');
+  };
+
   return (
-    <BrowserRouter>
-        <Routes>
+  <BrowserRouter>
+      <Routes>
         <Route element={
+          <>
           
-          <Container fluid className='App'>
-           <NavBar/>
-           <PageTable pages={pages}/>
+           <NavBar loggedIn={loggedIn} handleLogout={handleLogout}/>
+           <Container fluid className='App'>
+           {message && <Row>
+                  <Alert variant={message.type} onClose={() => setMessage('')} dismissible>{message.msg}</Alert>
+                </Row> }
+                <Outlet/>
            </Container>
-           
-        }>
+           </>}>
+
         <Route index 
-              element={ <PageTable pages={pages}/> } />
-      {/* <Route path='pages' 
-              element={<PageTable
-        pages={pages}
-      />} /> */}
-      </Route>
+          element={ <PageTable pages={pages} loggedIn={loggedIn}/> } />
+        <Route path='pages/:pageId' 
+          element={<SinglePage pages={pages}/> } />
+        <Route path='*' element={ <NotFound/> } />
+        <Route path='/login' element={
+              loggedIn ? <Navigate replace to='/' /> : <LoginForm login={handleLogin} />
+            } />
+        </Route>
       </Routes>
-      </BrowserRouter>
-  )
+  </BrowserRouter>
+      )
 }
 
 export default App
