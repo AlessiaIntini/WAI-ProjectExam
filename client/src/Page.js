@@ -31,10 +31,11 @@ export class Block {
    * @param {number} id id to identificate block
    * @param {string} type type of block
    */
-  constructor(id, type,content) {
+  constructor(id, type,content,page_id) {
     this.id=id;
     this.type=type;
     this.content=content;
+    this.page_id=page_id;
   }
 }
 

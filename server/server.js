@@ -61,12 +61,6 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
-//ROUTES
-app.get('/api/pages',(request, response)=>{
-  CMS_dao.listPages()
-  .then(pages=>response.json(pages))
-    .catch(()=>response.status(500).end());
-});
 
 // POST /api/sessions
 app.post('/api/sessions', function(req, res, next) {
@@ -102,4 +96,33 @@ app.delete('/api/sessions/current', (req, res) => {
     res.end();
   });
 });
+
+//ROUTES
+app.get('/api/pages',(request, response)=>{
+  CMS_dao.listPages()
+  .then(pages=>response.json(pages))
+    .catch(()=>response.status(500).end());
+});
+
+//POST /api/pages
+app.post('/api/pages',[
+  // check('title').notEmpty(),
+  // check('author').notEmpty(),
+  // check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
+],async (req, res)=>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({errors: errors.array()});
+  }
+  const newPage=req.body;
+
+  try{
+  const id= await CMS_dao.addPage(newPage);
+  res.status(201).location(id).end();
+  }catch(e){
+    console.error(`ERROR: ${e.message}`);
+    res.status(503).json({error: 'Impossible to create the page.'});
+  }
+});
+
 app.listen(port, () => 'API server started');

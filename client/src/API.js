@@ -1,5 +1,6 @@
 import {Page} from './Page'
 const SERVER_URL = 'http://localhost:3001';
+import dayjs from 'dayjs';
 
 const getPages = async ()=>{
     const response=await fetch(SERVER_URL+'/api/pages');
@@ -62,5 +63,19 @@ const updatePage = async (page) => {
     if (response.ok)
       return null;
   }
-const API={getPages,updatePage,logIn,getUserInfo,logOut}
+
+  const addPage = async (page) => {
+    const response = await fetch(`${SERVER_URL}/api/pages`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({title: page.title, author: page.author, creationDate: page.creationDate, publicationDate:page.publicationDate, blocks:page.blocks})
+    });
+  
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
+  }
+const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage}
 export default API;

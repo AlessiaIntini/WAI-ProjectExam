@@ -3,3 +3,5 @@ GET http://localhost:3001/api/pages
 POST http://localhost:3001/api/sessions
 ###
 GET  http://localhost:3001/api/sessions/current
+###
+POST http://localhost:3001/api/pages

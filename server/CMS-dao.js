@@ -40,18 +40,24 @@ exports.listPages = () => {
  });
 }
 
-// exports.updateAnswer = (answer, answerId) => {
-//   return new Promise ((resolve, reject) => {
-//     const sql = 'UPDATE answer SET text=?, author=?, date=DATE(?), score=? WHERE id=?';
-//     db.run(sql, [answer.text, answer.author, answer.date, answer.score, answerId], function(err) {
-//       if(err) {
-//         console.log(err);
-//         reject(err);
-//       }
-//       else resolve(this.lastID);
-//     });
-//   });
-// };
+//add new page
+exports.addPage = (page) => {
+  return new Promise ((resolve, reject) => {
+    for(const block of page.blocks){
+      const sql2 = 'INSERT INTO Block(id_b, page_id, type, content) VALUES (?, ?,?, ?)';
+      db.run(sql2, [block.id_b , page.id_p ,block.type, block.content], function(err) {
+        if(err) reject(err);
+        else resolve(this.lastID);
+      });
+    }
+    const sql = 'INSERT INTO Page(id_p, title, author, creationDate, publicationDate) VALUES (?, ?,?, DATE(?), DATE(?))';
+    db.run(sql, [page.id_p ,page.title, page.author, page.creationDate, page.publicationDate], function(err) {
+      if(err) reject(err);
+      else resolve(this.lastID);
+    });
+
+  });
+};
 
 
 //operations on pages and blocks

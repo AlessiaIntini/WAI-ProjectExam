@@ -11,10 +11,12 @@ import SinglePage from "./components/SinglePageComponent";
 import API from './API'
 import NotFound from './components/NotFoundComponent';
 import { LoginForm } from './components/AuthComponents';
+import PageForm from "./components/PageFormComponents";
 function App() {
   const [pages,setPages]=useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
+  const [user, setUser]=useState('')
 
   useEffect(()=>{
     //get all the pages from API
@@ -38,7 +40,9 @@ function App() {
     try {
       const user = await API.logIn(credentials);
       setLoggedIn(true);
+      setUser(user);
       setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
+      
     }catch(err) {
       setMessage({msg: err, type: 'danger'});
     }
@@ -68,8 +72,11 @@ function App() {
 
         <Route index 
           element={ <PageTable pages={pages} loggedIn={loggedIn}/> } />
+        <Route path='/pages' 
+              element={<PageForm user={user} />} />
         <Route path='pages/:pageId' 
           element={<SinglePage pages={pages}/> } />
+        
         <Route path='*' element={ <NotFound/> } />
         <Route path='/login' element={
               loggedIn ? <Navigate replace to='/' /> : <LoginForm login={handleLogin} />

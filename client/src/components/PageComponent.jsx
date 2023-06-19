@@ -15,8 +15,8 @@ function PageTable(props){
     <Container fluid="xxl">
       <h1>Welcome to CMSMALL!</h1>
       <p className='lead'>We now have {props.pages.length} pages available.</p>
-
-      {!props.loggedIn? <></>:<Button variant="secondary" size="lg" >Add new Page</Button>}
+      
+      {!props.loggedIn? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
      {/* {!props.loggedIn? <Button variant="secondary" size="lg" disabled >Add new Page</Button>:<Button variant="secondary" size="lg" >Add new Page</Button>}
   */}
        {props.pages.map((page)=><PageRow pageData={page} key={page.id} loggedIn={props.loggedIn}/>)} 
