@@ -2,32 +2,6 @@ import {Page} from './Page'
 const SERVER_URL = 'http://localhost:3001';
 import dayjs from 'dayjs';
 
-const getPages = async ()=>{
-    const response=await fetch(SERVER_URL+'/api/pages');
-    if(response.ok){
-        const pagesJson=await response.json();  
-        const pages=pagesJson.map(page=>new Page(page.id_p,page.title,page.author,page.creationDate,page.publicationDate,page.blocks)
-        );
-        return pages
-    }else
-        throw new Error('Internal server error');
-}
-
-const updatePage = async (page) => {
-    const response = await fetch(`${SERVER_URL}/api/pages/${page.id_p}`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      credentials: 'include',
-      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate.format('YYYY-MM-DD'), publicationDate: page.publicationDate.format('YYYY-MM-DD'),blocks:page.blocks})
-    });
-  
-    if(!response.ok) {
-      const errMessage = await response.json();
-      throw errMessage;
-    }
-    else return null;
-  };
-
   const logIn = async (credentials) => {
     const response = await fetch(SERVER_URL + '/api/sessions', {
       method: 'POST',
@@ -59,14 +33,42 @@ const updatePage = async (page) => {
     }
   };
   
-  const logOut = async() => {
+const logOut = async() => {
     const response = await fetch(SERVER_URL + '/api/sessions/current', {
       method: 'DELETE',
       credentials: 'include'
     });
     if (response.ok)
       return null;
-  }
+}
+
+const getPages = async ()=>{
+    const response=await fetch(`${SERVER_URL}/api/pages`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    if(response.ok){
+        const pagesJson=await response.json();  
+        let pages=pagesJson.map(page=>new Page(page.id_p,page.title,page.author,page.creationDate,page.publicationDate,page.blocks));
+        return pages
+    }else
+        throw new Error('Internal server error');
+}
+
+const updatePage = async (page) => {
+    const response = await fetch(`${SERVER_URL}/api/pages/${page.id_p}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate.format('YYYY-MM-DD'), publicationDate: page.publicationDate.format('YYYY-MM-DD'),blocks:page.blocks})
+    });
+  
+    if(!response.ok) {
+      const errMessage = await response.json();
+      throw errMessage;
+    }
+    else return null;
+};
 
   const addPage = async (page) => {
     const response = await fetch(`${SERVER_URL}/api/pages`, {

@@ -1,8 +1,9 @@
 // Import Boostrap and CSS
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
+import dayjs from 'dayjs';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState} from 'react'
 import NavBar from "./components/NavbarComponent";
 import PageTable from "./components/PageComponent";
 import { Container, Row, Col, Button,Alert } from 'react-bootstrap'
@@ -21,10 +22,21 @@ function App() {
   useEffect(()=>{
     //get all the pages from API
     const getPages=async()=>{
-     const pages= await API.getPages();
-    // console.log(pages)
+     let pages= await API.getPages();
+    //  if(loggedIn===true){
+    //   pages=pages.filter((x)=>{
+    //     const now=dayjs().format("YYYY-MM-DD");
+    //     const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
+    //     if(date!==NaN && date<=now){
+    //       console.log(date)
+    //       return x;
+    //     }
+    //   })
+    //  pages = pages.sort(
+    //     (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
+    //   );
+    //  }
     setPages(pages);
-
     }
     //call function that just create now
     getPages();
@@ -34,6 +46,7 @@ function App() {
     const checkAuth = async () => {
       await API.getUserInfo(); // we have the user info here
       setLoggedIn(true);
+   
     };
     checkAuth();
   }, []);
@@ -44,7 +57,6 @@ function App() {
       setLoggedIn(true);
       setUser(user);
       setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
-      
     }catch(err) {
       setMessage({msg: err, type: 'danger'});
     }

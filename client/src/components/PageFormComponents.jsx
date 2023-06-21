@@ -18,6 +18,7 @@ function PageForm(props){
     const [contHeader,setContHeader]=useState(false)
     const [contField,setContField]=useState(0)
     const [typeB,setTypeB]=useState('')
+    const [editableBlock,setEditableBlock]=useState([]);
 
 
 
@@ -28,6 +29,7 @@ function PageForm(props){
     const [creationDate,setCreationDate]=useState(now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
     const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
+    
 
     const [id_b,setIdB]=useState(60);
     const [content,setContent]=useState('');
@@ -38,19 +40,31 @@ function PageForm(props){
     
     const handleSubmit=(event)=>{
         event.preventDefault(); 
-        const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
-        setWaiting(true);
+       
         
         if(editablePage) {
           //modify page
+          //concateni i due blocchi e li passi, qui crei la pagina con i blocchi quindi sposti la creazione della pagina
+          if(blocks.length>0 && editableBlock.length>0){
+              setBlock((block)=>block.concat(editableBlock));
+          }
+          console.log(blocks)
+          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
+          setWaiting(true);
           API.updatePage(page)
-          .then(() => navigate(`/pages`))
+          .then(() => {
+            setWaiting(false);
+            navigate(`/`)})
           .catch() ;
           }
           else {
+          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
+          setWaiting(true);
             // add the page
             API.addPage(page)
-              .then(() => navigate(`/pages`))
+              .then(() =>{
+                setWaiting(false);
+                navigate(`/`)})
               .catch(setIsWrong(true)) ;
           }
       }
@@ -166,7 +180,7 @@ function PageForm(props){
 
         </tr>
       </thead>
-      {blocks.map((block)=><BlockOutput blockData={block} key={block.id_b} setContent={setContent}/>)}
+      {blocks.map((block)=><BlockOutput blockData={block} key={block.id_b} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
       </Table>}
 
       <br/><br/>
@@ -179,10 +193,11 @@ function PageForm(props){
 function BlockOutput(props){
   const content=props.blockData.content;
   const [changeContent,setChangeContent]=useState(content)
-
+//vettore di blocchi modificati
 
   const handleChange=()=>{
     props.setContent(changeContent);
+    props.setEditableBlock( pre => [...pre,{type:props.blockData.type,content:content,page_id: props.id_p}])
   }
  
     return(

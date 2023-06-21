@@ -1,5 +1,6 @@
 'use strict'
 //imports
+const dayjs=require('dayjs')
 const express = require('express');
 const morgan = require('morgan'); // Middleware for logging messages
 const cors = require('cors'); // Middleware to enable CORS support
@@ -51,6 +52,7 @@ const isLoggedIn = (req, res, next) => {
   if(req.isAuthenticated()) {
     return next();
   }
+  res.redirect("/login");
   return res.status(401).json({error: 'Not authorized'});
 }
 
@@ -98,10 +100,25 @@ app.delete('/api/sessions/current', (req, res) => {
 });
 
 //ROUTES
-app.get('/api/pages',(request, response)=>{
+//GET /api/pages
+app.get('/api/pages',(req, res)=>{
   CMS_dao.listPages()
-  .then(pages=>response.json(pages))
-    .catch(()=>response.status(500).end());
+  .then(pages=>{
+  //   pages=pages.filter(x=>{
+  //     //console.log(x)
+  //     const now=dayjs().format("YYYY-MM-DD");
+  //     const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
+  //     if(date!==NaN && date<=now){
+  //       console.log(date)
+  //       return x;
+  //     }
+  //   })
+  //  pages = pages.sort(
+  //     (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
+  //   );
+  //   }
+    res.json(pages)})
+  .catch(()=>res.status(500).end());
 });
 
 //POST /api/pages
