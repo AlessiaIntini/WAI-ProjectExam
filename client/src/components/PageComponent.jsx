@@ -6,6 +6,7 @@ import Collapse from 'react-bootstrap/Collapse';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import { Link } from 'react-router-dom';
+import {Page,Block} from '../Page'
 
 
 function PageTable(props){
@@ -19,7 +20,11 @@ function PageTable(props){
       {!props.loggedIn? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
      {/* {!props.loggedIn? <Button variant="secondary" size="lg" disabled >Add new Page</Button>:<Button variant="secondary" size="lg" >Add new Page</Button>}
   */}
-       {props.pages.map((page)=><PageRow pageData={page} key={page.id} loggedIn={props.loggedIn}/>)} 
+   {props.pages.map((page)=><PageRow pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>
+      
+        
+        )} 
+      
     </Container>
  
    );
@@ -55,8 +60,9 @@ function PageTable(props){
         <table align='center'>
         <tbody>
         <tr>
-       {!props.loggedIn? <></>:<th><Button variant='dark'><i class="bi bi-pencil"></i><Link to={`/pages/${props.id}`}></Link></Button></th>}
-        {!props.loggedIn? <></>: <th><Button variant='dark' ><i class="bi bi-scissors" ></i></Button></th>}
+       
+       {props.loggedIn && (props.user.name==props.pageData.author||props.user.role=='admin')? <th><Link to={`/pages/${props.pageData.id}`} state={props.pageData.serialize()} className='btn btn-primary' ><i class="bi bi-pencil"></i></Link></th>:<></>}
+        {props.loggedIn &&(props.user.name==props.pageData.author||props.user.role=='admin')? <th><Button variant='dark' ><i class="bi bi-scissors" ></i></Button></th>: <></>}
         </tr>
         </tbody>
         </table>

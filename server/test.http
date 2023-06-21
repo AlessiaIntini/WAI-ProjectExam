@@ -5,3 +5,16 @@ POST http://localhost:3001/api/sessions
 GET  http://localhost:3001/api/sessions/current
 ###
 POST http://localhost:3001/api/pages
+###
+PUT http://localhost:3001/api/pages/2 
+
+content-type:application/json
+
+body:{
+"id_p":"2",
+"title":"foddd",
+"author":"Marco",
+"creationDate":"2022-01-20",
+"publicationDate":"2023-10-01",
+"blocks":[]
+};

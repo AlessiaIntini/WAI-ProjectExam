@@ -106,9 +106,11 @@ app.get('/api/pages',(request, response)=>{
 
 //POST /api/pages
 app.post('/api/pages',[
-  // check('title').notEmpty(),
-  // check('author').notEmpty(),
-  // check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
+  isLoggedIn,
+  check('title').notEmpty(),
+  check('author').notEmpty(),
+  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
+  check('publicationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
 ],async (req, res)=>{
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -117,12 +119,38 @@ app.post('/api/pages',[
   const newPage=req.body;
 
   try{
-  const id= await CMS_dao.addPage(newPage);
-  res.status(201).location(id).end();
+  const result= await CMS_dao.addPage(newPage);
+  if (result.error)
+    res.status(400).json(result);
+  else
+  res.status(201).location(result).end();
   }catch(e){
     console.error(`ERROR: ${e.message}`);
     res.status(503).json({error: 'Impossible to create the page.'});
   }
+});
+//PUT /api/pages/<id>
+app.put('/api/pages/:id',[
+  // isLoggedIn,
+  check('title').notEmpty(),
+  check('author').notEmpty(),
+  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
+  check('publicationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
+],async (req,res)=>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({errors: errors.array()});
+  }
+  const pageToUpdate=req.body;
+  const pageId=req.params.id;
+
+  try{
+    await CMS_dao.updatePage(pageToUpdate,pageId) 
+    res.status(200).end();
+  } catch {
+    res.status(503).json({'error': `Impossible to update page #${pageId}.`});
+  }
+  
 });
 
 app.listen(port, () => 'API server started');

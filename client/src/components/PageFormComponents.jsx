@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation,useNavigate } from 'react-router-dom';
-import { Form, Button, Alert,Col,Card } from 'react-bootstrap';
+import { Form, Button, Alert,Col,Card, Table } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 import {Page,Block} from '../Page'
@@ -12,23 +12,25 @@ function PageForm(props){
     const location=useLocation();
     const editablePage=location.state;
     const navigate = useNavigate();
-    const now=new Date();
-    const [isShown, setIsShown] = useState(false);
-
+    const now=dayjs().format('YYYY-MM-DD');
+    const [isShown, setIsShown] = useState(editablePage?true:false);
+    const [isWrong,setIsWrong]=useState(false);
+    const [contHeader,setContHeader]=useState(false)
+    const [contField,setContField]=useState(0)
     const [typeB,setTypeB]=useState('')
 
-    let i=0;
+
+
     const [waiting, setWaiting] = useState(false);
-    const [id,setId]=useState(editablePage? editablePage.id:-1)
+    const [id_p,setId]=useState(editablePage? editablePage.id_p:-1)
     const [title,setTitle]=useState(editablePage?editablePage.title:'')
-    const [author,setAuthor]=useState(props.user.name)
+    const [author,setAuthor]=useState(editablePage?editablePage.author:'')
     const [creationDate,setCreationDate]=useState(now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
-    const [blocks,setBlock]=useState([])
+    const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
 
-    const [id_b,setIdB]=useState('60');
+    const [id_b,setIdB]=useState(60);
     const [content,setContent]=useState('');
-    const [page_id,setPageid]=useState(-1);
     
     const onTypeBlockChange=({target:{value}})=>{
       setTypeB(value);
@@ -36,46 +38,41 @@ function PageForm(props){
     
     const handleSubmit=(event)=>{
         event.preventDefault(); 
-        const page=new Page(id,title,author,creationDate,publicationDate,blocks);
+        const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
         setWaiting(true);
-        setPageid(page.id);
+        
         if(editablePage) {
-            // API.updateAnswer(answer)
-            //   .then(() => navigate(`/questions/${questionId}`));
-            //   //.catch() handle any errors from the server
+          //modify page
+          API.updatePage(page)
+          .then(() => navigate(`/pages`))
+          .catch() ;
           }
           else {
             // add the page
             API.addPage(page)
-              .then(() => navigate(`/pages`));
-              //.catch() handle any errors from the server
+              .then(() => navigate(`/pages`))
+              .catch(setIsWrong(true)) ;
           }
-    }
+      }
 
     const handleSubmitBlock=()=>{
-      //event.preventDefault();
-      const block=new Block(id_b,typeB,content);
-      
-      setBlock( pre => [...pre,{id_b:id_b+1,type:typeB,content:block.content,page_id:page_id}]);
+      if(contHeader==false && typeB=='header')setContHeader(true)
+
+      setContField((prevState) => ({
+        counter: prevState.counter + 1
+      })); 
+
+      setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p}]);
       setIsShown(true);
-      // setBlock(oldList =>{
-      //   const list=oldList.map((item)=>{
-      //     if(item.id_b){
-      //       return {id_b:item.id_b,type:item.type, content:item.content};
-      //     }else{
-      //       return item;
-      //     }
-      //   })
-      //   return list;
-      // });
-     
+      
     }
    
 
 
     return(
     <>
-{waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
+    {waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
+    {isWrong&&<Alert variant="secondary">number of blocks are wrog...</Alert> }
     <Form onSubmit={handleSubmit}>
       <Form.Group className='mb-3'>
         <Form.Label>Title</Form.Label>
@@ -83,7 +80,7 @@ function PageForm(props){
       </Form.Group>
       <Form.Group className='mb-3'>
         <Form.Label>Publication Date</Form.Label>
-        <Form.Control type="date" value={publicationDate} onChange={(event) => setpublicationDate(event.target.value)}></Form.Control>
+        <Form.Control type="date" value={publicationDate} onChange={(event) => setpublicationDate(dayjs(event.target.value).format("YYYY-MM-DD"))}></Form.Control>
       </Form.Group>
       {editablePage ? 
         <><Button variant="primary" type="submit">Update</Button> <Link to='../..' relative='path' className='btn btn-danger'>Cancel</Link></> :
@@ -156,30 +153,59 @@ function PageForm(props){
 
       <br/>
       <Button variant="primary" onClick={()=>handleSubmitBlock()}>Add</Button>
-      {isShown && blocks.map((block)=><BlockOutput blockData={block} key={block.id_b}/>)}
+      <br/><br/><br/><br/>
+      {isShown && 
+      <Table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Content</th>
+          <th>Sort</th>
+          <th>Edit</th>
+          <th>Delete</th>
+
+        </tr>
+      </thead>
+      {blocks.map((block)=><BlockOutput blockData={block} key={block.id_b} setContent={setContent}/>)}
+      </Table>}
+
       <br/><br/>
       </Form>
     </>
 
 )
 }
+
 function BlockOutput(props){
   const content=props.blockData.content;
+  const [changeContent,setChangeContent]=useState(content)
+
+
+  const handleChange=()=>{
+    props.setContent(changeContent);
+  }
+ 
     return(
       <>
-    {props.blockData.type=='header'?<Card.Header><h1>{content}</h1></Card.Header>:<></>}
-    {props.blockData.type=='image'? <Card.Img variant="top" src={`${content}/50px50`}/>:<></>}
+      <tbody>
+      <tr>
+      <th>{props.blockData.type}</th>
+    {props.blockData.type=='header'?<th> <Form.Control type="text" minLength={2} required={true} value={changeContent} onChange={(event) => setChangeContent(event.target.value)}></Form.Control></th>:<></>}
+    {props.blockData.type=='image'? <th><Image src={`${content}/100px250`} fluid /></th>:<></>}
     {props.blockData.type=='paragraph'?
-    <Card.Body>
-          <blockquote className="blockquote mb-0">
-            <p>
-              {' '}
-              {content}{' '}
-            </p>
-          </blockquote>
-        </Card.Body>:<></>
-    } 
-  
+                                      <th>
+                                      <Form.Control
+                                        as="textarea"
+                                        style={{ height: '150px' }}
+                                        value={changeContent} onChange={(event) => setChangeContent(event.target.value)}/>
+                                      </th>
+                                  :<></>} 
+      <th><Button variant="outline-dark"><i class="bi bi-arrow-down" ></i></Button>
+      <Button variant="outline-dark" ><i class="bi bi-arrow-up"></i></Button></th>
+      <th><Button variant="outline-dark" onClick={()=>handleChange()}><i class="bi bi-check2"></i></Button></th>
+      <th><Button variant="outline-dark"><i class="bi bi-trash3-fill"></i></Button></th>
+      </tr>
+      </tbody>
     </>
     )
   }

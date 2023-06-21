@@ -6,16 +6,19 @@ const getPages = async ()=>{
     const response=await fetch(SERVER_URL+'/api/pages');
     if(response.ok){
         const pagesJson=await response.json();  
-        return pagesJson.map(p=>new Page(p.id,p.title,p.author,p.creationDate,p.publicationDate,p.blocks));
+        const pages=pagesJson.map(page=>new Page(page.id_p,page.title,page.author,page.creationDate,page.publicationDate,page.blocks)
+        );
+        return pages
     }else
         throw new Error('Internal server error');
 }
 
 const updatePage = async (page) => {
-    const response = await fetch(`${SERVER_URL}/api/pages/${page.id}`, {
+    const response = await fetch(`${SERVER_URL}/api/pages/${page.id_p}`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text: page.text, author: answer.name, score: answer.score, date: answer.date.format('YYYY-MM-DD')})
+      credentials: 'include',
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate.format('YYYY-MM-DD'), publicationDate: page.publicationDate.format('YYYY-MM-DD'),blocks:page.blocks})
     });
   
     if(!response.ok) {
@@ -23,7 +26,8 @@ const updatePage = async (page) => {
       throw errMessage;
     }
     else return null;
-  }
+  };
+
   const logIn = async (credentials) => {
     const response = await fetch(SERVER_URL + '/api/sessions', {
       method: 'POST',
@@ -68,7 +72,8 @@ const updatePage = async (page) => {
     const response = await fetch(`${SERVER_URL}/api/pages`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({title: page.title, author: page.author, creationDate: page.creationDate, publicationDate:page.publicationDate, blocks:page.blocks})
+      credentials: 'include',
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate, publicationDate:page.publicationDate, blocks:page.blocks})
     });
   
     if(!response.ok) {

@@ -22,7 +22,9 @@ function App() {
     //get all the pages from API
     const getPages=async()=>{
      const pages= await API.getPages();
-     setPages(pages);
+    // console.log(pages)
+    setPages(pages);
+
     }
     //call function that just create now
     getPages();
@@ -71,11 +73,11 @@ function App() {
            </>}>
 
         <Route index 
-          element={ <PageTable pages={pages} loggedIn={loggedIn}/> } />
+          element={ <PageTable pages={pages} loggedIn={loggedIn} user={user}/> } />
         <Route path='/pages' 
               element={<PageForm user={user} />} />
         <Route path='pages/:pageId' 
-          element={<SinglePage pages={pages}/> } />
+          element={<PageForm  user={user}/> } />
         
         <Route path='*' element={ <NotFound/> } />
         <Route path='/login' element={
