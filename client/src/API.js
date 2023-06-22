@@ -49,7 +49,7 @@ const getPages = async ()=>{
     });
     if(response.ok){
         const pagesJson=await response.json();  
-        let pages=pagesJson.map(page=>new Page(page.id_p,page.title,page.author,page.creationDate,page.publicationDate,page.blocks));
+        let pages=pagesJson.map(page=>new Page(page.id_p,page.title,page.author, dayjs(page.creationDate).format('YYYY-MM-DD'), dayjs(page.publicationDate).format('YYYY-MM-DD'),page.blocks));
         return pages
     }else
         throw new Error('Internal server error');
@@ -60,7 +60,7 @@ const updatePage = async (page) => {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',
-      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate.format('YYYY-MM-DD'), publicationDate: page.publicationDate.format('YYYY-MM-DD'),blocks:page.blocks})
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: dayjs(page.creationDate).format('YYYY-MM-DD'), publicationDate: dayjs(page.publicationDate).format('YYYY-MM-DD'),blocks:page.blocks})
     });
   
     if(!response.ok) {
@@ -75,14 +75,21 @@ const updatePage = async (page) => {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',
-      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: page.creationDate, publicationDate:page.publicationDate, blocks:page.blocks})
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: dayjs(page.creationDate).format('YYYY-MM-DD'), publicationDate: dayjs(page.publicationDate).format('YYYY-MM-DD'), blocks:page.blocks})
     });
   
     if(!response.ok) {
       const errMessage = await response.json();
       throw errMessage;
     }
-    else return null;
+    else{
+
+      // const r=response.json().then(function (result){
+      // console.log(res.result)
+      let r=await response.json()
+      r=r+1;
+      return r
+    } 
   }
 const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage}
 export default API;

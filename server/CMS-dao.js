@@ -9,7 +9,6 @@ const db = new sqlite.Database('CMS.sqlite', (err) => {
 
 exports.listPages = () => {
   return new Promise((resolve, reject) => {
-
    const sql1='SELECT * FROM Block'
    db.all(sql1, [], (err, rows) => {
     if (err) {
@@ -44,8 +43,7 @@ exports.listPages = () => {
 //add new page
 exports.addPage = (page) => {
   return new Promise ((resolve, reject) => {
-    let flagH=0;
-    let count=0;
+
     if(page.publicationDate<page.creationDate){
       resolve({ error: 'dates are wrong.' });
     }else{
@@ -54,24 +52,15 @@ exports.addPage = (page) => {
       if(err){ reject(err);
       }else{
         for(const block of page.blocks){
-          if(block.type=='header')
-            flagH=1;
-          else
-            count++;
-        }
-        if(flagH==0||count<2){
-          resolve({ error: 'blocks are wrong.' });
-        }else{
-        
-        for(const block of page.blocks){
           exports.addBlock(block,this.lastID)
         }
         resolve(this.lastID);
       }
-    }
     })
-    }
+  }
+    
   });
+
 };
 
 exports.addBlock=(block,pageId)=>{

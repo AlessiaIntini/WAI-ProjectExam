@@ -15,22 +15,24 @@ function PageForm(props){
     const now=dayjs().format('YYYY-MM-DD');
     const [isShown, setIsShown] = useState(editablePage?true:false);
     const [isWrong,setIsWrong]=useState(false);
+
     const [contHeader,setContHeader]=useState(false)
     const [contField,setContField]=useState(0)
+
     const [typeB,setTypeB]=useState('')
     const [editableBlock,setEditableBlock]=useState([]);
 
 
 
     const [waiting, setWaiting] = useState(false);
-    const [id_p,setId]=useState(editablePage? editablePage.id_p:-1)
+    const [id_p,setId]=useState(editablePage? editablePage.id_p: props.lastID )
     const [title,setTitle]=useState(editablePage?editablePage.title:'')
-    const [author,setAuthor]=useState(editablePage?editablePage.author:'')
-    const [creationDate,setCreationDate]=useState(now)
+    const [author,setAuthor]=useState(props.user.name)
+    const [creationDate,setCreationDate]=useState(editablePage?editablePage.creationDate:now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
     const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
-    
-
+    const [newBlocks,setNewBlocks]=useState([]);
+   
     const [id_b,setIdB]=useState(60);
     const [content,setContent]=useState('');
     
@@ -38,19 +40,21 @@ function PageForm(props){
       setTypeB(value);
     };
     
-    const handleSubmit=(event)=>{
+    const handleSubmit=async (event)=>{
         event.preventDefault(); 
-       
+       let r=0;
         
         if(editablePage) {
           //modify page
           //concateni i due blocchi e li passi, qui crei la pagina con i blocchi quindi sposti la creazione della pagina
-          if(blocks.length>0 && editableBlock.length>0){
+          if(newBlocks.length>0 && editableBlock.length>0){
               setBlock((block)=>block.concat(editableBlock));
           }
-          console.log(blocks)
+          
+          
           const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
           setWaiting(true);
+          
           API.updatePage(page)
           .then(() => {
             setWaiting(false);
@@ -58,26 +62,34 @@ function PageForm(props){
           .catch() ;
           }
           else {
+         // console.log(props.lastID)
+        
+          if(contField<2||contHeader==false){
+            setIsWrong(true);
+          }else{
           const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
+          props.setPages(pre => [...pre,page])
           setWaiting(true);
-            // add the page
-            API.addPage(page)
-              .then(() =>{
+              API.addPage(page)
+               .then(()=>{
                 setWaiting(false);
-                navigate(`/`)})
-              .catch(setIsWrong(true)) ;
+                navigate(`/`);
+                });
           }
+        }
       }
 
     const handleSubmitBlock=()=>{
+      console.log(typeB)
       if(contHeader==false && typeB=='header')setContHeader(true)
-
-      setContField((prevState) => ({
-        counter: prevState.counter + 1
-      })); 
-
-      setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p}]);
-      setIsShown(true);
+      setContField(contField+1); 
+      if(editablePage){
+        setNewBlocks(pre => [...pre,{type:typeB,content:content,page_id:id_p}])
+      }else{
+        setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p}]);
+        setIsShown(true);
+      }
+      
       
     }
    
@@ -87,6 +99,10 @@ function PageForm(props){
     <>
     {waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
     {isWrong&&<Alert variant="secondary">number of blocks are wrog...</Alert> }
+    <Card>
+      <Card.Body>{author}</Card.Body>
+      <Card.Body>{creationDate}</Card.Body>
+    </Card>
     <Form onSubmit={handleSubmit}>
       <Form.Group className='mb-3'>
         <Form.Label>Title</Form.Label>

@@ -133,22 +133,25 @@ app.post('/api/pages',[
   if (!errors.isEmpty()) {
     return res.status(422).json({errors: errors.array()});
   }
+ 
   const newPage=req.body;
-
+  console.log(newPage)
   try{
   const result= await CMS_dao.addPage(newPage);
   if (result.error)
     res.status(400).json(result);
   else
-  res.status(201).location(result).end();
+  //res.send(result);
+  res.status(201).json(result)
   }catch(e){
     console.error(`ERROR: ${e.message}`);
     res.status(503).json({error: 'Impossible to create the page.'});
   }
 });
+
 //PUT /api/pages/<id>
 app.put('/api/pages/:id',[
-  // isLoggedIn,
+   isLoggedIn,
   check('title').notEmpty(),
   check('author').notEmpty(),
   check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),

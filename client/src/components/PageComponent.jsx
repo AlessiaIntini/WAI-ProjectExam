@@ -20,11 +20,7 @@ function PageTable(props){
       {!props.loggedIn? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
      {/* {!props.loggedIn? <Button variant="secondary" size="lg" disabled >Add new Page</Button>:<Button variant="secondary" size="lg" >Add new Page</Button>}
   */}
-   {props.pages.map((page)=><PageRow pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>
-      
-        
-        )} 
-      
+   {props.pages.map((page)=><PageRow setLastId={props.setLastId} pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>)} 
     </Container>
  
    );
@@ -33,9 +29,10 @@ function PageTable(props){
   function PageRow(props){
     const [open, setOpen] = useState(false);
     let now = dayjs().format("YYYY-MM-DD");
+
+  
       return(
         <>
-     
         <Row>
         <Button
         variant='light' size="lg"
@@ -44,7 +41,7 @@ function PageTable(props){
         aria-expanded={open}
        class="text-left "
       >
-       <h2>{props.pageData.title}</h2>
+       <h2 onChange={props.setLastId(props.pageData.id_p+1)}>{props.pageData.title}</h2>
       </Button>
       <Collapse in={open}>
       <Card border="dark">

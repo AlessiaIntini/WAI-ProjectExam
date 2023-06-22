@@ -18,24 +18,12 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
   const [user, setUser]=useState('')
+  const [lastID,setLastId]=useState();
 
   useEffect(()=>{
     //get all the pages from API
     const getPages=async()=>{
-     let pages= await API.getPages();
-    //  if(loggedIn===true){
-    //   pages=pages.filter((x)=>{
-    //     const now=dayjs().format("YYYY-MM-DD");
-    //     const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
-    //     if(date!==NaN && date<=now){
-    //       console.log(date)
-    //       return x;
-    //     }
-    //   })
-    //  pages = pages.sort(
-    //     (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
-    //   );
-    //  }
+    let pages= await API.getPages();
     setPages(pages);
     }
     //call function that just create now
@@ -84,10 +72,10 @@ function App() {
            </Container>
            </>}>
 
-        <Route index 
-          element={ <PageTable pages={pages} loggedIn={loggedIn} user={user}/> } />
+        <Route index
+          element={ <PageTable setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
         <Route path='/pages' 
-              element={<PageForm user={user} />} />
+              element={<PageForm setPages={setPages} user={user} />} />
         <Route path='pages/:pageId' 
           element={<PageForm  user={user}/> } />
         
