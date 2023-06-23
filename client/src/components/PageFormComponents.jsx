@@ -260,7 +260,25 @@ function BlockOutput(props){
       <tr>
       <th>{props.blockData.type}</th>
     {props.blockData.type=='header'?<th> <Form.Control type="text" minLength={2} required={true} value={changeContent} onChange={(event) => setChangeContent(event.target.value)}></Form.Control></th>:<></>}
-    {props.blockData.type=='image'? <th><Card.Img src={image[content]} fluid /></th>:<></>}
+    {props.blockData.type=='image'? <th><Card.Img src={image[content]} fluid />
+    <Col md>
+        <FloatingLabel
+          controlId="floatingSelectGrid"
+          label="choose an image"
+        >
+          <Form.Select aria-label="choose an image" value={changeContent} onChange={(event) => setChangeContent(event.target.value)}>
+            <option>Open this select menu</option>
+            <option value="Rome">Rome</option>
+            <option value="Pizza">Pizza</option>
+            <option value="Dog" >Dog</option>
+            <option value="Game" >Game</option>
+            <option value="Garden">Garden</option>
+
+          </Form.Select>
+        </FloatingLabel>
+        </Col>
+        </th>
+    :<></>}
     {props.blockData.type=='paragraph'?
                                       <th>
                                       <Form.Control
