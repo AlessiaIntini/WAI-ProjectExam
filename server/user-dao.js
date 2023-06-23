@@ -41,7 +41,7 @@ exports.getUserById = (id) => {
         resolve({error: 'User not found!'}); 
       }
       else {
-        const user = {id: row.id, username: row.email, name: row.name};
+        const user = {id: row.id, username: row.email,role: row.role, name: row.name};
         resolve(user);
       }
     });

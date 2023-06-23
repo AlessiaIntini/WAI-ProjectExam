@@ -70,6 +70,33 @@ const updatePage = async (page) => {
     else return null;
 };
 
+// const editTitle=async (title)=>{
+//   const response = await fetch(`${SERVER_URL}/api/pages/title`, {
+//     method:'PUT',
+//     headers: {'Content-Type': 'application/json'},
+//       credentials: 'include',
+//       body: JSON.stringify({titleAdmin: title})
+//   });
+//   if(!response.ok) {
+//     const errMessage = await response.json();
+//     throw errMessage;
+//   }
+//   else return null;
+// };
+
+// const getTitle=async()=>{
+//   const response=await fetch(`${SERVER_URL}/api`, {
+//     method: 'GET',
+//     credentials: 'include'
+//   });
+//   if(response.ok){
+//       const titleTab=await response.json();  
+//       let title=new Title(titleTab.id,titleTab.titleAdmin,titleTab.titleDefault);
+//       return title
+//   }else
+//       throw new Error('Internal server error');
+// }
+
   const addPage = async (page) => {
     const response = await fetch(`${SERVER_URL}/api/pages`, {
       method: 'POST',
@@ -83,8 +110,6 @@ const updatePage = async (page) => {
       throw errMessage;
     }
     else{
-      // const r=response.json().then(function (result){
-      // console.log(res.result)
       let r=await response.json()
       r=r+1;
       return r

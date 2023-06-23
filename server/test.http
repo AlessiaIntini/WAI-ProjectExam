@@ -18,3 +18,5 @@ body:{
 "publicationDate":"2023-10-01",
 "blocks":[]
 };
+###
+GET http://localhost:3001/api

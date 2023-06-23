@@ -4,11 +4,12 @@ import "./App.css";
 import dayjs from 'dayjs';
 
 import { useEffect, useState} from 'react'
+import { useNavigate } from 'react-router-dom';
 import NavBar from "./components/NavbarComponent";
 import PageTable from "./components/PageComponent";
 import { Container, Row, Col, Button,Alert } from 'react-bootstrap'
 import {Routes,Route, BrowserRouter,Outlet,Navigate } from 'react-router-dom'
-import SinglePage from "./components/SinglePageComponent";
+import TitleForm from './components/TitleFormComponent';
 import API from './API'
 import NotFound from './components/NotFoundComponent';
 import { LoginForm } from './components/AuthComponents';
@@ -19,16 +20,19 @@ function App() {
   const [message, setMessage] = useState('');
   const [user, setUser]=useState(null)
   const [lastID,setLastId]=useState();
+  const navigate=useNavigate;
 
-  // useEffect(()=>{
-  //   //get all the pages from API
-  //   const getPages=async()=>{
-  //   let pages= await API.getPages();
-  //   setPages(pages);
-  //   }
-  //   //call function that just create now
-  //   getPages();
-  // },[]);
+  const [title,setTitle]=useState('')
+
+  useEffect(()=>{
+    //get all the pages from API
+    const getTitle=async()=>{
+    let titleA= await API.getTitle().then(
+    setTitle(titleA));
+    }
+    //call function that just create now
+    getTitle();
+  },[]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -51,10 +55,11 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await API.logOut();
+    await API.logOut().then(()=>{
     setLoggedIn(false);
     setUser(null)
     setMessage('');
+  });
   };
 
   return (
@@ -76,9 +81,11 @@ function App() {
           element={ <PageTable setPages={setPages} setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
         <Route path='/pages' 
               element={<PageForm setPages={setPages} user={user} />} />
-        <Route path='pages/:pageId' 
+        <Route path='/pages/:pageId' 
           element={<PageForm  user={user}/> } />
-        
+        <Route path='pages/title'
+            element={ <TitleForm/> }
+        />
         <Route path='*' element={ <NotFound/> } />
         <Route path='/login' element={
               loggedIn ? <Navigate replace to='/' /> : <LoginForm login={handleLogin} />

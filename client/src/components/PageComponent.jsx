@@ -1,4 +1,11 @@
 import dayjs from 'dayjs';
+//import all images
+import Rome from '../image/Rome.jpg'
+import Pizza from '../image/Pizza.jpg'
+import Game from '../image/Game.jpg'
+import Dog from '../image/Dog.jpg'
+import Garden from '../image/Garden.jpg'
+
 import { Table, Form } from 'react-bootstrap'
 import { Card,Button } from 'react-bootstrap';
 import { useState } from 'react'
@@ -83,11 +90,13 @@ function PageTable(props){
       );
 }
 function BlockRow(props){
-const content=props.blockData.content;
+  const [image,setImage]=useState({"Rome":Rome,"Pizza":Pizza,"Dog":Dog,"Game":Game,"Garden":Garden})
+  const content=props.blockData.content;
   return(
     <>
   {props.blockData.type=='header'?<Card.Header><h1>{content}</h1></Card.Header>:<></>}
-  {props.blockData.type=='image'? <Card.Img variant="top" src={`${content}/50px50`}/>:<></>}
+  {props.blockData.type=='image'? <Card.Img variant="top" src={image[content]}/>:<></>}
+  
   {props.blockData.type=='paragraph'?
   <Card.Body>
         <blockquote className="blockquote mb-0">

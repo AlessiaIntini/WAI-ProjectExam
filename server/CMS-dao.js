@@ -68,9 +68,9 @@ exports.addPage = (page) => {
 //update an existing page
 exports.updatePage=(page,pageId)=>{
   return new Promise ((resolve, reject) => {
-    const sql = 'UPDATE page SET  title=?,  publicationDate=DATE(?) WHERE id_p=?';
-    db.run(sql, [page.title,  page.publicationDate, pageId], function(err) {
-      console.log("ciao")
+    const sql = 'UPDATE page SET  title=?, author=?, creationDate=DATE(?),  publicationDate=DATE(?) WHERE id_p=?';
+    db.run(sql, [page.title,page.author,page.creationDate, page.publicationDate, pageId], function(err) {
+
       if(err) {
         console.log(err);
         reject(err);
@@ -87,7 +87,7 @@ exports.updatePage=(page,pageId)=>{
     }
     if(page?.deleteBlocks?.length>0){
       for(const block of page.deleteBlocks ){
-        exports.deleteBlock(block.id_b)
+        exports.deleteBlocksById(block.id_b)
       }
     }
 
@@ -114,7 +114,7 @@ exports.getBlocks=(pageId)=>{
 exports.deletePage=(page,pageId)=>{
   return new Promise((resolve, reject) => {
 
-    exports.deleteBlocks(pageId)
+    exports.deleteBlocksByPageid(pageId)
 
     const sql = 'DELETE FROM page WHERE id_p=?';
     db.run(sql, [pageId], function (err) {
@@ -140,10 +140,22 @@ exports.addBlock=(block,pageId)=>{
 }
 
 //delete block
-exports.deleteBlocks=(pageId)=>{
+exports.deleteBlocksByPageid=(pageId)=>{
   return new Promise((resolve, reject) => {
     const sql = 'DELETE FROM block WHERE page_id=?';
     db.run(sql, [pageId], function (err) {
+      if (err) {
+        reject(err);
+      }
+    });
+  });
+
+}
+
+exports.deleteBlocksById=(blockId)=>{
+  return new Promise((resolve, reject) => {
+    const sql = 'DELETE FROM block WHERE id_b=?';
+    db.run(sql, [blockId], function (err) {
       if (err) {
         reject(err);
       }
@@ -166,3 +178,16 @@ exports.updateBlock=(block,blockId)=>{
   });
 
 }
+// //get title of website
+// exports.getTitle=()=>{
+//   return new Promise ((resolve, reject) => {
+//     const sql1 = 'SELECT * FROM Title';
+//       db.all(sql1, [], (err, row) => {
+//         if (err) {
+//           reject(err);
+//         }
+//         let title = row.map((t) => new Title(t.id,b.type,b.content,b.page_id));
+//         resolve(title)
+//       })
+//       });
+// }

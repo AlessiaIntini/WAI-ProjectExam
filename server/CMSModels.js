@@ -21,5 +21,10 @@ function Page(id_p,title,author,creationDate,publicationDate,blocks,editBlocks=0
     this.deleteBlocks=deleteBlocks;
     this.newBlocks=newBlocks;
 }
+function Title(id,titleAdmin,titleDefault){
+    this.id=id;
+    this.titleAdmin=titleAdmin;
+    this.titleDefault=titleDefault;
+}
 
-module.exports={Page,Block};
+module.exports={Page,Block,Title};

@@ -8,6 +8,13 @@ import API from '../API';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import FormCheck from 'react-bootstrap/FormCheck'
 
+//import all images
+import Rome from '../image/Rome.jpg'
+import Pizza from '../image/Pizza.jpg'
+import Game from '../image/Game.jpg'
+import Dog from '../image/Dog.jpg'
+import Garden from '../image/Garden.jpg'
+
 function PageForm(props){
     const location=useLocation();
     const editablePage=location.state;
@@ -29,7 +36,7 @@ function PageForm(props){
     const [waiting, setWaiting] = useState(false);
     const [id_p,setId]=useState(editablePage? editablePage.id_p: props.lastID )
     const [title,setTitle]=useState(editablePage?editablePage.title:'')
-    const [author,setAuthor]=useState(props.user.name)
+    const [author,setAuthor]=useState(props?.user?.role=='admin'&&editablePage ? editablePage.author : props?.user?.name)
     const [creationDate,setCreationDate]=useState(editablePage?editablePage.creationDate:now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
     const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
@@ -107,12 +114,18 @@ function PageForm(props){
         <th><Button variant='danger' onClick={()=>handleDelete()} ><i class="bi bi-scissors" >Delete page</i></Button></th>
       </tr>
     </Table>:<></>}
-
-    <Card>
-      <Card.Body>{author}</Card.Body>
-      <Card.Body>{creationDate}</Card.Body>
-    </Card>
     <Form onSubmit={handleSubmit}>
+    <Card>
+    {props.user.role=='admin'?
+    <Form.Group className='mb-3'>
+        <Form.Label>Author</Form.Label>
+        <Form.Control type="text" minLength={2} required={true} value={author} onChange={(event) => setAuthor(event.target.value)}></Form.Control>
+      </Form.Group>
+    :
+      <Card.Body>{author}</Card.Body>
+      }
+      <Card.Body>{creationDate}</Card.Body>
+      </Card>
       <Form.Group className='mb-3'>
         <Form.Label>Title</Form.Label>
         <Form.Control type="text" minLength={2} required={true} value={title} onChange={(event) => setTitle(event.target.value)}></Form.Control>
@@ -183,9 +196,12 @@ function PageForm(props){
         >
           <Form.Select aria-label="choose an image" value={content} onChange={(event) => setContent(event.target.value)}>
             <option>Open this select menu</option>
-            <option value="Roma.jpg">Rome</option>
-            <option value="Pizza.jpg">Pizza</option>
-            <option value="flower.jpg" >flower</option>
+            <option value="Rome">Rome</option>
+            <option value="Pizza">Pizza</option>
+            <option value="Dog" >Dog</option>
+            <option value="Game" >Game</option>
+            <option value="Garden">Garden</option>
+
           </Form.Select>
         </FloatingLabel>
       </Col>:<></>}
@@ -219,14 +235,17 @@ function PageForm(props){
 
 function BlockOutput(props){
   const content=props.blockData.content;
+  const [image,setImage]=useState({"Rome":Rome,"Pizza":Pizza,"Dog":Dog,"Game":Game,"Garden":Garden})
   //props.setIdB(props.blockData.id)
   const [changeContent,setChangeContent]=useState(content)
   const [elDelete,setDelete]=useState(false)
+  
 //vettore di blocchi modificati
 
   const handleChange=()=>{
    // props.setContent(changeContent);
     props.setEditableBlock( pre => [...pre,{type:props.blockData.type,id_b:props.blockData.id_b,content:changeContent,page_id: props.id_p}])
+
   }
 
   const handleDelete=()=>{
@@ -241,7 +260,7 @@ function BlockOutput(props){
       <tr>
       <th>{props.blockData.type}</th>
     {props.blockData.type=='header'?<th> <Form.Control type="text" minLength={2} required={true} value={changeContent} onChange={(event) => setChangeContent(event.target.value)}></Form.Control></th>:<></>}
-    {props.blockData.type=='image'? <th><Image src={`${content}/100px250`} fluid /></th>:<></>}
+    {props.blockData.type=='image'? <th><Card.Img src={image[content]} fluid /></th>:<></>}
     {props.blockData.type=='paragraph'?
                                       <th>
                                       <Form.Control
@@ -254,6 +273,7 @@ function BlockOutput(props){
       <Button variant="outline-dark" ><i class="bi bi-arrow-up"></i></Button></th>
       <th><Button variant="outline-dark" onClick={()=>handleChange()}><i class="bi bi-check2"></i></Button></th>
       <th><Button variant="outline-dark" onClick={()=>handleDelete()}><i class="bi bi-trash3-fill"></i></Button></th>
+   
       </tr>
       </tbody>
       :<></>}

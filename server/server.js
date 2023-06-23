@@ -120,6 +120,15 @@ app.get('/api/pages',(req, res)=>{
     res.json(pages)})
   .catch(()=>res.status(500).end());
 });
+//GET /api/pages
+// app.get('/api/',async (req, res)=> {
+//   const result= await CMS_dao.getTitle();
+//   if (result.error)
+//     res.status(400).json(result);
+//   else
+//   //res.send(result);
+//   res.status(201).json(result)
+// });
 
 //POST /api/pages
 app.post('/api/pages',[
@@ -166,7 +175,6 @@ app.put('/api/pages/:id',[
 
   try{
     const result=await CMS_dao.updatePage(pageToUpdate,pageId) 
-    console.log(result.json)
     if(result.error)
     res.status(400).json(result)
     else
@@ -195,5 +203,8 @@ app.delete('/api/pages/:id',
     }
   }
 );
+
+
+
 
 app.listen(port, () => 'API server started');

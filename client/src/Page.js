@@ -11,14 +11,14 @@ export class Page {
    * @param {Date} publicationDate date when page is publicated
    * @param {Block[]} blocks blocks associated with the page
    */
-  constructor(id_p,title, author, creationDate,publicationDate,blocks, editBlocks=0, newBlocks=0, deleteBlocks=0) {
+  constructor(id_p,title, author, creationDate,publicationDate,blocks, editableBlock=0, newBlocks=0, deleteBlocks=0) {
     this.id_p=id_p;
     this.title = title;
     this.author = author;
     this.creationDate = dayjs(creationDate);
     this.publicationDate = dayjs(publicationDate);
     this.blocks=blocks;
-    this.editBlocks=editBlocks;
+    this.editableBlock=editableBlock;
     this.newBlocks=newBlocks;
     this.deleteBlocks=deleteBlocks;
     
@@ -45,6 +45,20 @@ export class Block {
     this.content=content;
     this.page_id=page_id;
     this.pos=pos;
+  }
+}
+
+export class Title{
+   /**
+   * Creates a new instance of StudyPlan
+   * @param {number} id id to identificate title
+   * @param {string} titleAdmin title that admin change
+   * @param {string} titleDefault
+   */
+   constructor(id, titleAdmin,titleDefault) {
+    this.id=id;
+    this.titleAdmin=titleAdmin;
+    this.titleDefault=titleDefault;
   }
 }
 
