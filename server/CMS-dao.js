@@ -7,6 +7,8 @@ const db = new sqlite.Database('CMS.sqlite', (err) => {
   if (err) throw err;
 });
 
+//operations on pages and blocks
+//list of all pages
 exports.listPages = () => {
   return new Promise((resolve, reject) => {
    const sql1='SELECT * FROM Block'
@@ -63,9 +65,71 @@ exports.addPage = (page) => {
 
 };
 
+//update an existing page
+exports.updatePage=(page,pageId)=>{
+  return new Promise ((resolve, reject) => {
+    const sql = 'UPDATE page SET  title=?,  publicationDate=DATE(?) WHERE id_p=?';
+    db.run(sql, [page.title,  page.publicationDate, pageId], function(err) {
+      console.log("ciao")
+      if(err) {
+        console.log(err);
+        reject(err);
+      }
+    if(page.newBlocks.length>0){
+      for(const block of page.newBlocks){
+        exports.addBlock(block,pageId)
+      }
+    }
+    if(page?.editableBlock?.length>0){
+      for(const block of page.editableBlock){
+        exports.updateBlock(block,block.id_b)
+      }
+    }
+    if(page?.deleteBlocks?.length>0){
+      for(const block of page.deleteBlocks ){
+        exports.deleteBlock(block.id_b)
+      }
+    }
+
+    resolve(exports.getBlocks(pageId))
+  })
+  });
+};
+
+exports.getBlocks=(pageId)=>{
+  return new Promise ((resolve, reject) => {
+  const sql1 = 'SELECT * FROM Block WHERE page_id=?';
+    db.all(sql1, [pageId], (err, rows) => {
+      if (err) {
+        reject(err);
+      }
+      let blocks = rows.map((b) => new Block(b.id_b,b.type,b.content,b.page_id));
+      resolve(blocks)
+    })
+    });
+    
+}
+
+//delete a page
+exports.deletePage=(page,pageId)=>{
+  return new Promise((resolve, reject) => {
+
+    exports.deleteBlocks(pageId)
+
+    const sql = 'DELETE FROM page WHERE id_p=?';
+    db.run(sql, [pageId], function (err) {
+      if (err) {
+        reject(err);
+      }
+      resolve(null)
+    });
+  });
+
+}
+
+//add block to new page
 exports.addBlock=(block,pageId)=>{
  return new Promise ((resolve, reject) => {
-      
       const sql2 = 'INSERT INTO Block(id_b, page_id, type, content) VALUES (?, ?,?, ?)';
       db.run(sql2, [block.id_b , pageId ,block.type, block.content], function(err) {
         if(err) reject(err);
@@ -75,11 +139,24 @@ exports.addBlock=(block,pageId)=>{
   })
 }
 
-//update an existing page
-exports.updatePage=(page,pageId)=>{
+//delete block
+exports.deleteBlocks=(pageId)=>{
+  return new Promise((resolve, reject) => {
+    const sql = 'DELETE FROM block WHERE page_id=?';
+    db.run(sql, [pageId], function (err) {
+      if (err) {
+        reject(err);
+      }
+    });
+  });
+
+}
+
+//update block
+exports.updateBlock=(block,blockId)=>{
   return new Promise ((resolve, reject) => {
-    const sql = 'UPDATE page SET  title=?,  publicationDate=DATE(?) WHERE id_p=?';
-    db.run(sql, [page.title,  page.publicationDate, pageId], function(err) {
+    const sql = 'UPDATE block SET content=? WHERE id_b=?';
+    db.run(sql, [block.content, blockId], function(err) {
       if(err) {
         console.log(err);
         reject(err);
@@ -87,5 +164,5 @@ exports.updatePage=(page,pageId)=>{
       else resolve(this.lastID);
     });
   });
-};
-//operations on pages and blocks
+
+}

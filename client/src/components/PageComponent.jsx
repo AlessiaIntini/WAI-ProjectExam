@@ -7,9 +7,20 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import { Link } from 'react-router-dom';
 import {Page,Block} from '../Page'
-
+import API from '../API';
+import { useEffect} from 'react'
 
 function PageTable(props){
+
+  useEffect(()=>{
+    //get all the pages from API
+    const getPages=async()=>{
+    let pages= await API.getPages();
+    props.setPages(pages);
+    }
+    //call function that just create now
+    getPages();
+  },[]);
 
    return(
 
@@ -32,7 +43,7 @@ function PageTable(props){
 
   
       return(
-        <>
+        
         <Row>
         <Button
         variant='light' size="lg"
@@ -58,8 +69,7 @@ function PageTable(props){
         <tbody>
         <tr>
        
-       {props.loggedIn && (props.user.name==props.pageData.author||props.user.role=='admin')? <th><Link to={`/pages/${props.pageData.id}`} state={props.pageData.serialize()} className='btn btn-primary' ><i class="bi bi-pencil"></i></Link></th>:<></>}
-        {props.loggedIn &&(props.user.name==props.pageData.author||props.user.role=='admin')? <th><Button variant='dark' ><i class="bi bi-scissors" ></i></Button></th>: <></>}
+       {props.loggedIn && (props?.user?.name==props.pageData.author||props?.user?.role=='admin')? <th><Link to={`/pages/${props.pageData.id}`} state={props.pageData.serialize()} className='btn btn-primary' ><i class="bi bi-pencil"></i></Link></th>:<></>}
         </tr>
         </tbody>
         </table>
@@ -69,7 +79,7 @@ function PageTable(props){
       </Collapse>
 
         </Row>
-        </>
+        
       );
 }
 function BlockRow(props){
@@ -81,12 +91,10 @@ const content=props.blockData.content;
   {props.blockData.type=='paragraph'?
   <Card.Body>
         <blockquote className="blockquote mb-0">
-          <p>
-            {' '}
-            {content}{' '}
-          </p>
+          <p>{' '}{content}{' '}</p>
         </blockquote>
-      </Card.Body>:<></>
+      </Card.Body>:
+      <></>
   } 
 
   </>

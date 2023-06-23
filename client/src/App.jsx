@@ -17,18 +17,18 @@ function App() {
   const [pages,setPages]=useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [message, setMessage] = useState('');
-  const [user, setUser]=useState('')
+  const [user, setUser]=useState(null)
   const [lastID,setLastId]=useState();
 
-  useEffect(()=>{
-    //get all the pages from API
-    const getPages=async()=>{
-    let pages= await API.getPages();
-    setPages(pages);
-    }
-    //call function that just create now
-    getPages();
-  },[]);
+  // useEffect(()=>{
+  //   //get all the pages from API
+  //   const getPages=async()=>{
+  //   let pages= await API.getPages();
+  //   setPages(pages);
+  //   }
+  //   //call function that just create now
+  //   getPages();
+  // },[]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -53,7 +53,7 @@ function App() {
   const handleLogout = async () => {
     await API.logOut();
     setLoggedIn(false);
-    // clean up everything
+    setUser(null)
     setMessage('');
   };
 
@@ -63,7 +63,7 @@ function App() {
         <Route element={
           <>
           
-           <NavBar loggedIn={loggedIn} handleLogout={handleLogout}/>
+           <NavBar user={user} loggedIn={loggedIn} handleLogout={handleLogout}/>
            <Container fluid className='App'>
            {message && <Row>
                   <Alert variant={message.type} onClose={() => setMessage('')} dismissible>{message.msg}</Alert>
@@ -73,7 +73,7 @@ function App() {
            </>}>
 
         <Route index
-          element={ <PageTable setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
+          element={ <PageTable setPages={setPages} setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
         <Route path='/pages' 
               element={<PageForm setPages={setPages} user={user} />} />
         <Route path='pages/:pageId' 

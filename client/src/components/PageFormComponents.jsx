@@ -20,8 +20,10 @@ function PageForm(props){
     const [contField,setContField]=useState(0)
 
     const [typeB,setTypeB]=useState('')
-    const [editableBlock,setEditableBlock]=useState([]);
 
+    const [editableBlock,setEditableBlock]=useState([]);
+    const [newBlocks,setNewBlocks]=useState([]);
+    const [deleteBlocks,setDeleteBlocks]=useState([])
 
 
     const [waiting, setWaiting] = useState(false);
@@ -31,7 +33,7 @@ function PageForm(props){
     const [creationDate,setCreationDate]=useState(editablePage?editablePage.creationDate:now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
     const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
-    const [newBlocks,setNewBlocks]=useState([]);
+    
    
     const [id_b,setIdB]=useState(60);
     const [content,setContent]=useState('');
@@ -45,16 +47,12 @@ function PageForm(props){
        let r=0;
         
         if(editablePage) {
-          //modify page
-          //concateni i due blocchi e li passi, qui crei la pagina con i blocchi quindi sposti la creazione della pagina
-          if(newBlocks.length>0 && editableBlock.length>0){
-              setBlock((block)=>block.concat(editableBlock));
-          }
+         // setNewBlocks((nB)=>nB.filter(x=> !deleteBlocks.has(x)));
+         // setEditableBlock((edB)=>edB.filter(x=>!deleteBlocks.has(x)));
           
-          
-          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
+          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks,editableBlock,newBlocks,deleteBlocks);
+         
           setWaiting(true);
-          
           API.updatePage(page)
           .then(() => {
             setWaiting(false);
@@ -62,7 +60,6 @@ function PageForm(props){
           .catch() ;
           }
           else {
-         // console.log(props.lastID)
         
           if(contField<2||contHeader==false){
             setIsWrong(true);
@@ -74,7 +71,8 @@ function PageForm(props){
                .then(()=>{
                 setWaiting(false);
                 navigate(`/`);
-                });
+                })
+                .catch();
           }
         }
       }
@@ -92,6 +90,11 @@ function PageForm(props){
       
       
     }
+    const handleDelete=()=>{
+      API.deletePage(editablePage,id_p).
+        then(()=>navigate(`/`))
+        .catch();
+    }
    
 
 
@@ -99,6 +102,12 @@ function PageForm(props){
     <>
     {waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
     {isWrong&&<Alert variant="secondary">number of blocks are wrog...</Alert> }
+    {editablePage?<Table>
+      <tr>
+        <th><Button variant='danger' onClick={()=>handleDelete()} ><i class="bi bi-scissors" >Delete page</i></Button></th>
+      </tr>
+    </Table>:<></>}
+
     <Card>
       <Card.Body>{author}</Card.Body>
       <Card.Body>{creationDate}</Card.Body>
@@ -196,8 +205,10 @@ function PageForm(props){
 
         </tr>
       </thead>
-      {blocks.map((block)=><BlockOutput blockData={block} key={block.id_b} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
-      </Table>}
+      {blocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
+      {editablePage? newBlocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} key={block.id_b} blockData={block} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>) :<></>}
+      </Table>
+      }
 
       <br/><br/>
       </Form>
@@ -208,16 +219,24 @@ function PageForm(props){
 
 function BlockOutput(props){
   const content=props.blockData.content;
+  //props.setIdB(props.blockData.id)
   const [changeContent,setChangeContent]=useState(content)
+  const [elDelete,setDelete]=useState(false)
 //vettore di blocchi modificati
 
   const handleChange=()=>{
-    props.setContent(changeContent);
-    props.setEditableBlock( pre => [...pre,{type:props.blockData.type,content:content,page_id: props.id_p}])
+   // props.setContent(changeContent);
+    props.setEditableBlock( pre => [...pre,{type:props.blockData.type,id_b:props.blockData.id_b,content:changeContent,page_id: props.id_p}])
+  }
+
+  const handleDelete=()=>{
+    setDelete(true);
+    props.setDeleteBlocks( pre => [...pre,{type:props.blockData.type,id_b:props.blockData.id_b, content:content,page_id: props.id_p}]);
   }
  
     return(
       <>
+      {!elDelete?
       <tbody>
       <tr>
       <th>{props.blockData.type}</th>
@@ -234,10 +253,12 @@ function BlockOutput(props){
       <th><Button variant="outline-dark"><i class="bi bi-arrow-down" ></i></Button>
       <Button variant="outline-dark" ><i class="bi bi-arrow-up"></i></Button></th>
       <th><Button variant="outline-dark" onClick={()=>handleChange()}><i class="bi bi-check2"></i></Button></th>
-      <th><Button variant="outline-dark"><i class="bi bi-trash3-fill"></i></Button></th>
+      <th><Button variant="outline-dark" onClick={()=>handleDelete()}><i class="bi bi-trash3-fill"></i></Button></th>
       </tr>
       </tbody>
+      :<></>}
     </>
     )
+
   }
 export default PageForm;

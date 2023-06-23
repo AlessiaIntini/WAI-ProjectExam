@@ -151,7 +151,7 @@ app.post('/api/pages',[
 
 //PUT /api/pages/<id>
 app.put('/api/pages/:id',[
-   isLoggedIn,
+  isLoggedIn,
   check('title').notEmpty(),
   check('author').notEmpty(),
   check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
@@ -165,12 +165,35 @@ app.put('/api/pages/:id',[
   const pageId=req.params.id;
 
   try{
-    await CMS_dao.updatePage(pageToUpdate,pageId) 
-    res.status(200).end();
+    const result=await CMS_dao.updatePage(pageToUpdate,pageId) 
+    console.log(result.json)
+    if(result.error)
+    res.status(400).json(result)
+    else
+    res.status(201).json(result);
   } catch {
     res.status(503).json({'error': `Impossible to update page #${pageId}.`});
   }
   
 });
+
+app.delete('/api/pages/:id',
+  isLoggedIn,
+  [ check('id').isInt() ],
+  async (req, res) => {
+    try {
+      // NOTE: if there is no film with the specified id, the delete operation is considered successful.
+      const pageToDelete=req.body;
+      const pageId=req.params.id;
+      const result = await CMS_dao.deletePage(pageToDelete,pageId);
+      if (result == null)
+        return res.status(200).json({}); 
+      else
+        return res.status(404).json(result);
+    } catch (err) {
+      res.status(503).json({ error: `Database error during the deletion of page ${req.params.id}: ${err} ` });
+    }
+  }
+);
 
 app.listen(port, () => 'API server started');

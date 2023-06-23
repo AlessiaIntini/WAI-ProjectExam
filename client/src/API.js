@@ -60,7 +60,7 @@ const updatePage = async (page) => {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',
-      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: dayjs(page.creationDate).format('YYYY-MM-DD'), publicationDate: dayjs(page.publicationDate).format('YYYY-MM-DD'),blocks:page.blocks})
+      body: JSON.stringify({id_p:page.id_p,title: page.title, author: page.author, creationDate: dayjs(page.creationDate).format('YYYY-MM-DD'), publicationDate: dayjs(page.publicationDate).format('YYYY-MM-DD'),blocks:page.blocks,editableBlock: page.editableBlock,newBlocks: page.newBlocks,deleteBlocks: page.deleteBlocks})
     });
   
     if(!response.ok) {
@@ -83,7 +83,6 @@ const updatePage = async (page) => {
       throw errMessage;
     }
     else{
-
       // const r=response.json().then(function (result){
       // console.log(res.result)
       let r=await response.json()
@@ -91,5 +90,15 @@ const updatePage = async (page) => {
       return r
     } 
   }
-const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage}
+
+  const deletePage = async(page,pageId) =>{
+    const response =await fetch(`${SERVER_URL}/api/pages/${pageId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if(response.ok)
+      return null;
+  }
+
+const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage,deletePage}
 export default API;

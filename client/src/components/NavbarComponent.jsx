@@ -9,14 +9,14 @@ function NavBar(props) {
   return (
     <Navbar id="color-nav" expand="sm" variant="light" fixed="top" className="navbar-padding">
     <Navbar.Brand href="index.html">
-    <i class="bi bi-file-earmark"></i> CMSMALL
+    <i className="bi bi-file-earmark"></i> CMSMALL
     </Navbar.Brand>
     <Nav className="justify-content-end" style={{ width: "100%" }}>
     <Nav.Item>
     <Container fluid>
-    {props.loggedIn ? 
-        <LogoutButton logout={props.handleLogout} /> :
-        <Link to='/login' className='btn btn-outline-light'>Login</Link>
+    {!props.loggedIn && props.user==null ?  <Link to='/login' className='btn btn-outline-light'>Login</Link>:
+        <LogoutButton logout={props.handleLogout} /> 
+       
          }
          </Container>
     </Nav.Item>
