@@ -33,6 +33,9 @@ function PageForm(props){
     const [deleteBlocks,setDeleteBlocks]=useState([])
 
 
+    const swap = (array, i, j) => [array[i], array[j]] = [array[j], array[i]];
+    let orderArray=[];
+
     const [waiting, setWaiting] = useState(false);
     const [id_p,setId]=useState(editablePage? editablePage.id_p: props.lastID )
     const [title,setTitle]=useState(editablePage?editablePage.title:'')
@@ -40,6 +43,8 @@ function PageForm(props){
     const [creationDate,setCreationDate]=useState(editablePage?editablePage.creationDate:now)
     const [publicationDate,setpublicationDate]=useState(editablePage?editablePage.publicationDate:'');
     const [blocks,setBlock]=useState(editablePage?editablePage.blocks:[])
+
+    const [pos,setPos]=useState(0)
     
    
     const [id_b,setIdB]=useState(60);
@@ -54,8 +59,14 @@ function PageForm(props){
        let r=0;
         
         if(editablePage) {
-         // setNewBlocks((nB)=>nB.filter(x=> !deleteBlocks.has(x)));
-         // setEditableBlock((edB)=>edB.filter(x=>!deleteBlocks.has(x)));
+          
+          orderArray=[...blocks];
+          let i=0;
+          for(const ob of orderArray){
+            ob.pos=i;
+            i++;
+          }
+          setBlock(orderArray)
           
           const page=new Page(id_p,title,author,creationDate,publicationDate,blocks,editableBlock,newBlocks,deleteBlocks);
          
@@ -84,6 +95,11 @@ function PageForm(props){
             if(!find)
               bNew.push(row)
           }
+          let i=0;
+          for(const b of bNew){
+            b.pos=i;
+            i=i+1;
+          }
       
           const page=new Page(id_p,title,author,creationDate,publicationDate,bNew);
           props.setPages(pre => [...pre,page])
@@ -104,9 +120,11 @@ function PageForm(props){
       setContField(contField+1); 
       if(editablePage){
         setNewBlocks(pre => [...pre,{type:typeB,content:content,page_id:id_p}])
+        
       }else{
-        setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p}]);
+        setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p,pos:pos}]);
         setIsShown(true);
+        setPos((p)=>p+1);
       }
       
       
@@ -116,8 +134,20 @@ function PageForm(props){
         then(()=>navigate(`/`))
         .catch();
     }
-   
 
+//dir=false verso giù indici i e i+1
+//dir=true verso su inidici i e i-1
+  const handleSwap=(block,dir)=>{
+    orderArray=[...blocks]
+    let index = orderArray.findIndex(item => item == block);
+    if(!dir){
+    swap(orderArray,index,index+1)
+    }else{
+    swap(orderArray,index,index-1)
+    }
+    setBlock(orderArray)
+  }
+   
 
     return(
     <>
@@ -235,7 +265,7 @@ function PageForm(props){
 
         </tr>
       </thead>
-      {blocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} editablePage={editablePage} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
+      {blocks.map((block)=><BlockOutput handleSwap={handleSwap} setDeleteBlocks={setDeleteBlocks} editablePage={editablePage} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
       {editablePage? newBlocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} key={block.id_b} blockData={block} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>) :<></>}
       </Table>
       }
@@ -250,6 +280,7 @@ function PageForm(props){
 function BlockOutput(props){
   const content=props.blockData.content;
   const [image,setImage]=useState({"Rome":Rome,"Pizza":Pizza,"Dog":Dog,"Game":Game,"Garden":Garden})
+  
   //props.setIdB(props.blockData.id)
   const [changeContent,setChangeContent]=useState(content)
   const [elDelete,setDelete]=useState(false)
@@ -270,6 +301,8 @@ function BlockOutput(props){
       props.setDeleteBlocks( pre => [...pre,{type:props.blockData.type, content:content,page_id: props.id_p}]);
     }
   }
+
+
  
     return(
       <>
@@ -305,8 +338,8 @@ function BlockOutput(props){
                                         value={changeContent} onChange={(event) => setChangeContent(event.target.value)}/>
                                       </th>
                                   :<></>} 
-      <th><Button variant="outline-dark"><i class="bi bi-arrow-down" ></i></Button>
-      <Button variant="outline-dark" ><i class="bi bi-arrow-up"></i></Button></th>
+      <th><Button variant="outline-dark"><i class="bi bi-arrow-down" onClick={()=>props.handleSwap(props.blockData,false) }></i></Button>
+      <Button variant="outline-dark" ><i class="bi bi-arrow-up" onClick={()=>props.handleSwap(props.blockData,true) }></i></Button></th>
       <th><Button variant="outline-dark" onClick={()=>handleChange()}><i class="bi bi-check2"></i></Button></th>
       <th><Button variant="outline-dark" onClick={()=>handleDelete()}><i class="bi bi-trash3-fill"></i></Button></th>
    

@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import dayjs from 'dayjs';
 
-import { useEffect, useState} from 'react'
+import { Component, useEffect, useState,useContext} from 'react'
 import { useNavigate } from 'react-router-dom';
 import NavBar from "./components/NavbarComponent";
 import PageTable from "./components/PageComponent";
@@ -14,6 +14,9 @@ import API from './API'
 import NotFound from './components/NotFoundComponent';
 import { LoginForm } from './components/AuthComponents';
 import PageForm from "./components/PageFormComponents";
+import context from "react-bootstrap/esm/AccordionContext";
+// import TitleContext from "./components/ContextComponent";
+
 function App() {
   const [pages,setPages]=useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -21,6 +24,7 @@ function App() {
   const [user, setUser]=useState(null)
   const [lastID,setLastId]=useState();
   const navigate=useNavigate;
+  const title = useContext(context);
 
   // const [title,setTitle]=useState('')
 
@@ -83,7 +87,7 @@ function App() {
               element={<PageForm setPages={setPages} user={user} />} />
         <Route path='/pages/:pageId' 
           element={<PageForm  user={user}/> } />
-        <Route path='pages/title'
+        <Route path='/pages/admin/title'
             element={ <TitleForm/> }
         />
         <Route path='*' element={ <NotFound/> } />

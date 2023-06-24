@@ -70,32 +70,32 @@ const updatePage = async (page) => {
     else return null;
 };
 
-// const editTitle=async (title)=>{
-//   const response = await fetch(`${SERVER_URL}/api/pages/title`, {
-//     method:'PUT',
-//     headers: {'Content-Type': 'application/json'},
-//       credentials: 'include',
-//       body: JSON.stringify({titleAdmin: title})
-//   });
-//   if(!response.ok) {
-//     const errMessage = await response.json();
-//     throw errMessage;
-//   }
-//   else return null;
-// };
+const editTitle=async (title)=>{
+  const response = await fetch(`${SERVER_URL}/api/pages/admin/title`, {
+    method:'POST',
+    headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({id:1,titleAdmin: title,titleDefault:'CMSmall'})
+  });
+  if(!response.ok) {
+    const errMessage = await response.json();
+    throw errMessage;
+  }
+  else return null;
+};
 
-// const getTitle=async()=>{
-//   const response=await fetch(`${SERVER_URL}/api`, {
-//     method: 'GET',
-//     credentials: 'include'
-//   });
-//   if(response.ok){
-//       const titleTab=await response.json();  
-//       let title=new Title(titleTab.id,titleTab.titleAdmin,titleTab.titleDefault);
-//       return title
-//   }else
-//       throw new Error('Internal server error');
-// }
+const getTitle=async()=>{
+  const response=await fetch(`${SERVER_URL}/api/`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+  if(response.ok){
+      const titleTab=await response.json();  
+      let title=new Title(titleTab.id,titleTab.titleAdmin,titleTab.titleDefault);
+      return title
+  }else
+      throw new Error('Internal server error');
+}
 
   const addPage = async (page) => {
     const response = await fetch(`${SERVER_URL}/api/pages`, {
@@ -125,5 +125,5 @@ const updatePage = async (page) => {
       return null;
   }
 
-const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage,deletePage}
+const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage,deletePage,editTitle,getTitle}
 export default API;

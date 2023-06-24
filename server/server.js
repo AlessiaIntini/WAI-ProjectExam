@@ -104,31 +104,24 @@ app.delete('/api/sessions/current', (req, res) => {
 app.get('/api/pages',(req, res)=>{
   CMS_dao.listPages()
   .then(pages=>{
-  //   pages=pages.filter(x=>{
-  //     //console.log(x)
-  //     const now=dayjs().format("YYYY-MM-DD");
-  //     const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
-  //     if(date!==NaN && date<=now){
-  //       console.log(date)
-  //       return x;
-  //     }
-  //   })
-  //  pages = pages.sort(
-  //     (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
-  //   );
-  //   }
     res.json(pages)})
   .catch(()=>res.status(500).end());
 });
-//GET /api/pages
-// app.get('/api/',async (req, res)=> {
-//   const result= await CMS_dao.getTitle();
-//   if (result.error)
-//     res.status(400).json(result);
-//   else
-//   //res.send(result);
-//   res.status(201).json(result)
-// });
+//GET /api/session/current
+app.get('/api/',async (req, res)=> {
+  // const result= await CMS_dao.getTitle();
+  // if (result.error)
+  //   res.status(400).json(result);
+  // else
+  // //res.send(result);
+  // res.status(201).json(result)
+  CMS_dao.getTitle()
+  .then(title=>{
+    res.json(title)})
+  .catch(()=>res.status(500).end());
+});
+
+
 
 //POST /api/pages
 app.post('/api/pages',[
@@ -160,7 +153,7 @@ app.post('/api/pages',[
 
 //PUT /api/pages/<id>
 app.put('/api/pages/:id',[
-  isLoggedIn,
+  //isLoggedIn,
   check('title').notEmpty(),
   check('author').notEmpty(),
   check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
@@ -204,6 +197,30 @@ app.delete('/api/pages/:id',
   }
 );
 
+//POST /api/pages/title
+app.post('/api/pages/admin/title',[
+  //isLoggedIn
+],async (req, res)=>{
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({errors: errors.array()});
+  }
+  //if(req.user.role==='admin'){
+    const titleUp=req.body;
+  try{
+  const result= await CMS_dao.editTitle(titleUp);
+  if (result.error)
+    res.status(400).json(result);
+  else
+  //res.send(result);
+  res.status(201).json(result)
+  }catch(e){
+    console.error(`ERROR: ${e.message}`);
+    res.status(503).json({error: 'Impossible to create the page.'});
+  }
+// }else 
+//   res.status(401)
+});
 
 
 

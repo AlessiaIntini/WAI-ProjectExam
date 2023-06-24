@@ -2,16 +2,18 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Navbar, Nav, Form,Button} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { LogoutButton } from './AuthComponents';
-import { useState } from 'react'
+import { useState,useContext } from 'react'
 import { Container } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useEffect} from 'react'
+import context from 'react-bootstrap/esm/AccordionContext';
+// import TitleContext from "./ContextComponent";
 
 
 function NavBar(props) {
   // const [title,setTitle]=useState('CMSmall')
-
+  const title = useContext(context);
   // useEffect(()=>{
   //   //get all the pages from API
   //   const getTitle=async()=>{
@@ -32,7 +34,7 @@ function NavBar(props) {
     <Container fluid>
     <Row>
     <Col md="auto">
-    {props.loggedIn && props?.user?.role=='admin'? <Link to={`pages/title`} className='btn btn-outline-light' ><i class="bi bi-pencil-square"></i></Link>:<></>}
+    {props.loggedIn && props?.user?.role=='admin'? <Link to={`pages/admin/title`} className='btn btn-outline-light' ><i class="bi bi-pencil-square"></i></Link>:<></>}
    
     </Col>
     <Col xs lg="2">

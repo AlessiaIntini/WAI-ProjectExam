@@ -23,6 +23,25 @@ function PageTable(props){
     //get all the pages from API
     const getPages=async()=>{
     let pages= await API.getPages();
+
+    if(props.user==null||!props.loggedIn){
+      pages=pages.filter(x=>{
+        const now=dayjs().format("YYYY-MM-DD");
+        const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
+        if(date && date<=now){
+          console.log(date)
+          return true;
+        }
+      })
+     pages = pages.sort(
+        (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
+      );
+     }
+     for(const p of pages){
+      p.blocks.sort(
+        (objA, objB) => Number(objA.pos) - Number(objB.pos),
+      )
+     }
     props.setPages(pages);
     }
     //call function that just create now
@@ -36,8 +55,6 @@ function PageTable(props){
       <p className='lead'>We now have {props.pages.length} pages available.</p>
       
       {!props.loggedIn? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
-     {/* {!props.loggedIn? <Button variant="secondary" size="lg" disabled >Add new Page</Button>:<Button variant="secondary" size="lg" >Add new Page</Button>}
-  */}
    {props.pages.map((page)=><PageRow setLastId={props.setLastId} pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>)} 
     </Container>
  
@@ -47,7 +64,7 @@ function PageTable(props){
   function PageRow(props){
     const [open, setOpen] = useState(false);
     let now = dayjs().format("YYYY-MM-DD");
-
+    let date=dayjs(props.pageData.publicationDate).format('YYYY-MM-DD')
   
       return(
         
@@ -61,16 +78,20 @@ function PageTable(props){
       >
        <h2 onChange={props.setLastId(props.pageData.id_p+1)}>{props.pageData.title}</h2>
       </Button>
+
       <Collapse in={open}>
       <Card border="dark">
         <Card.Body>
         <Card.Text align='left'>
         <i >Created by: {props.pageData.author}</i>
+        <Card>
         {props.pageData.blocks.map((block)=><BlockRow blockData={block} key={block.id_b}/>)} 
-        <p>{!props.pageData.publicationDate ? 'It is a draft':<></>}</p>
-        <p>{props.pageData.publicationDate && props.pageData.publicationDate>now ?'publication of this page is planned in the future on '+dayjs(props.pageData.publicationDate).format("YYYY-MM-DD"):<></>}
-        {props.pageData.publicationDate&& props.pageData.publicationDate<now?
-        'Publication date: '+dayjs(props.pageData.publicationDate).format("YYYY-MM-DD"):<></>}</p>
+       
+        </Card>
+        {!props.pageData.publicationDate ? 'It is a draft':<></>}
+        {props.pageData.publicationDate && date>=now ?'publication of this page is planned in the future on '+date:<></>}
+        {props.pageData.publicationDate&& date<now?
+        'Publication date: '+date:<></>}
         </Card.Text>
         <table align='center'>
         <tbody>
