@@ -71,7 +71,21 @@ function PageForm(props){
           if(contField<2||contHeader==false){
             setIsWrong(true);
           }else{
-          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks);
+         
+          let bNew=[]
+          let find
+          for(const row of blocks){
+            find = 0
+            for(const c of deleteBlocks){
+              if(c.content===row.content && c.type===row.type){
+                find = 1
+              }
+            }
+            if(!find)
+              bNew.push(row)
+          }
+      
+          const page=new Page(id_p,title,author,creationDate,publicationDate,bNew);
           props.setPages(pre => [...pre,page])
           setWaiting(true);
               API.addPage(page)
@@ -221,7 +235,7 @@ function PageForm(props){
 
         </tr>
       </thead>
-      {blocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
+      {blocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} editablePage={editablePage} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
       {editablePage? newBlocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} key={block.id_b} blockData={block} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>) :<></>}
       </Table>
       }
@@ -250,7 +264,11 @@ function BlockOutput(props){
 
   const handleDelete=()=>{
     setDelete(true);
+    if(props.editablePage){
     props.setDeleteBlocks( pre => [...pre,{type:props.blockData.type,id_b:props.blockData.id_b, content:content,page_id: props.id_p}]);
+    }else{
+      props.setDeleteBlocks( pre => [...pre,{type:props.blockData.type, content:content,page_id: props.id_p}]);
+    }
   }
  
     return(

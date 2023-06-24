@@ -22,17 +22,17 @@ function App() {
   const [lastID,setLastId]=useState();
   const navigate=useNavigate;
 
-  const [title,setTitle]=useState('')
+  // const [title,setTitle]=useState('')
 
-  useEffect(()=>{
-    //get all the pages from API
-    const getTitle=async()=>{
-    let titleA= await API.getTitle().then(
-    setTitle(titleA));
-    }
-    //call function that just create now
-    getTitle();
-  },[]);
+  // useEffect(()=>{
+  //   //get all the pages from API
+  //   const getTitle=async()=>{
+  //   let titleA= await API.getTitle().then(
+  //   setTitle(titleA));
+  //   }
+  //   //call function that just create now
+  //   getTitle();
+  // },[]);
 
   useEffect(() => {
     const checkAuth = async () => {
