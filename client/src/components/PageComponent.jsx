@@ -25,23 +25,13 @@ function PageTable(props){
     let pages= await API.getPages();
 
     if(props.user==null||!props.loggedIn){
-      pages=pages.filter(x=>{
-        const now=dayjs().format("YYYY-MM-DD");
-        const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
-        if(date && date<=now){
-          console.log(date)
-          return true;
-        }
-      })
-     pages = pages.sort(
-        (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
-      );
-     }
-     for(const p of pages){
+      pages=props.filterPage(pages)
+    }
+    for(const p of pages){
       p.blocks.sort(
         (objA, objB) => Number(objA.pos) - Number(objB.pos),
       )
-     }
+    }
     props.setPages(pages);
     }
     //call function that just create now
@@ -54,7 +44,7 @@ function PageTable(props){
       <h1>Welcome to CMSMALL!</h1>
       <p className='lead'>We now have {props.pages.length} pages available.</p>
       
-      {!props.loggedIn? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
+      {!props.loggedIn || props.user==null? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
    {props.pages.map((page)=><PageRow setLastId={props.setLastId} pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>)} 
     </Container>
  
@@ -88,9 +78,10 @@ function PageTable(props){
         {props.pageData.blocks.map((block)=><BlockRow blockData={block} key={block.id_b}/>)} 
        
         </Card>
+
         {!props.pageData.publicationDate ? 'It is a draft':<></>}
         {props.pageData.publicationDate && date>=now ?'publication of this page is planned in the future on '+date:<></>}
-        {props.pageData.publicationDate&& date<now?
+        {props.pageData.publicationDate && date<now?
         'Publication date: '+date:<></>}
         </Card.Text>
         <table align='center'>

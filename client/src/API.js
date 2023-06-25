@@ -1,4 +1,4 @@
-import {Page} from './Page'
+import {Page,Title} from './Page'
 const SERVER_URL = 'http://localhost:3001';
 import dayjs from 'dayjs';
 
@@ -122,7 +122,11 @@ const getTitle=async()=>{
         credentials: 'include'
       });
       if(response.ok)
-      return null;
+      return pageId;
+      else{
+      const errMessage = await response.json();
+      throw errMessage;
+      }
   }
 
 const API={getPages,updatePage,logIn,getUserInfo,logOut,addPage,deletePage,editTitle,getTitle}

@@ -45,3 +45,7 @@
 #color-nav{
   background-color: #c8a2c8;
 }
+
+.my-own-color {
+  color: white !important; 
+}

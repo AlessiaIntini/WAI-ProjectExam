@@ -23,8 +23,8 @@ function PageForm(props){
     const [isShown, setIsShown] = useState(editablePage?true:false);
     const [isWrong,setIsWrong]=useState(false);
 
-    const [contHeader,setContHeader]=useState(false)
-    const [contField,setContField]=useState(0)
+    const [contHeader,setContHeader]=useState( editablePage? editablePage.blocks.filter(x => x.type=='header').length:0 )
+    const [contField,setContField]=useState(editablePage? editablePage.blocks.filter(x => x.type!=='header').length:0 )
 
     const [typeB,setTypeB]=useState('')
 
@@ -54,86 +54,110 @@ function PageForm(props){
       setTypeB(value);
     };
     
-    const handleSubmit=async (event)=>{
-        event.preventDefault(); 
-       let r=0;
-        
-        if(editablePage) {
-          
-          orderArray=[...blocks];
-          let i=0;
-          for(const ob of orderArray){
-            ob.pos=i;
-            i++;
-          }
-          setBlock(orderArray)
-          
-          const page=new Page(id_p,title,author,creationDate,publicationDate,blocks,editableBlock,newBlocks,deleteBlocks);
-         
-          setWaiting(true);
-          API.updatePage(page)
-          .then(() => {
-            setWaiting(false);
-            navigate(`/`)})
-          .catch() ;
-          }
-          else {
-        
-          if(contField<2||contHeader==false){
-            setIsWrong(true);
-          }else{
-         
-          let bNew=[]
-          let find
-          for(const row of blocks){
-            find = 0
-            for(const c of deleteBlocks){
-              if(c.content===row.content && c.type===row.type){
-                find = 1
-              }
-            }
-            if(!find)
-              bNew.push(row)
-          }
-          let i=0;
-          for(const b of bNew){
-            b.pos=i;
-            i=i+1;
-          }
-      
-          const page=new Page(id_p,title,author,creationDate,publicationDate,bNew);
-          props.setPages(pre => [...pre,page])
-          setWaiting(true);
-              API.addPage(page)
-               .then(()=>{
-                setWaiting(false);
-                navigate(`/`);
-                })
-                .catch();
-          }
+const handleSubmit=async (event)=>{
+  let h=0;
+  let cf=0;
+  if(props.loggedIn){
+    event.preventDefault(); 
+ 
+   
+
+    console.log(contField)
+    console.log(contHeader)
+
+    for (const db of deleteBlocks){
+      if(db.type=='header'){
+        if(contHeader>0){
+          setContHeader((h)=>h-1)
+        }
+      }else{
+        if(contField>0){
+          setContField((cf)=>cf-1)
         }
       }
+    }
+    if(contField===0||contHeader===0){
+      setIsWrong(true);
+    }else{
+      if(editablePage) {
+        orderArray=[...blocks];
+        let i=0;
+        for(const ob of orderArray){
+          ob.pos=i;
+          i++;
+          }
+        setBlock(orderArray)
+          
+        const page=new Page(id_p,title,author,creationDate,publicationDate,blocks,editableBlock,newBlocks,deleteBlocks);
+         
+        setWaiting(true);
+        
+        API.updatePage(page)
+        .then(() => {
+          setWaiting(false);
+          navigate(`/`)})
+        .catch() ;
+      }else {
+        let bNew=[]
+        let find
+        for(const row of blocks){
+          find = 0
+          for(const c of deleteBlocks){
+            if(c.content===row.content && c.type===row.type){
+              find = 1
+            }
+          }
+        if(!find)
+            bNew.push(row)
+        }
+        let i=0;
+        for(const b of bNew){
+          b.pos=i;
+          i=i+1;
+        }
+      
+        const page=new Page(id_p,title,author,creationDate,publicationDate,bNew);
+        props.setPages(pre => [...pre,page])
+        setWaiting(true);
+        API.addPage(page)
+          .then(()=>{
+            setWaiting(false);
+            navigate(`/`);
+          })
+          .catch();
+          
+      }
+    }
+  }else{
+    navigate(`/`);
+  }
+  }
 
-    const handleSubmitBlock=()=>{
-      console.log(typeB)
-      if(contHeader==false && typeB=='header')setContHeader(true)
-      setContField(contField+1); 
+  const handleSubmitBlock=()=>{
+  if(props.loggedIn){
+  if(typeB=='header')setContHeader((h)=>h+1)
+  else  setContField((cf)=>cf+1); 
       if(editablePage){
         setNewBlocks(pre => [...pre,{type:typeB,content:content,page_id:id_p}])
-        
       }else{
         setBlock( pre => [...pre,{type:typeB,content:content,page_id:id_p,pos:pos}]);
         setIsShown(true);
         setPos((p)=>p+1);
       }
-      
+    }else{
+      navigate(`/`);
+    }
       
     }
     const handleDelete=()=>{
+      if(props.loggedIn){
       API.deletePage(editablePage,id_p).
         then(()=>navigate(`/`))
         .catch();
+    }else{
+      navigate(`/`)
     }
+  }
 
 //dir=false verso giù indici i e i+1
 //dir=true verso su inidici i e i-1
@@ -152,7 +176,7 @@ function PageForm(props){
     return(
     <>
     {waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
-    {isWrong&&<Alert variant="secondary">number of blocks are wrog...</Alert> }
+    {isWrong&&<Alert variant="danger" onClose={() => setIsWrong(false)}>Number of blocks are wrog, add other blocks or return to home page</Alert> }
     {editablePage?<Table>
       <tr>
         <th><Button variant='danger' onClick={()=>handleDelete()} ><i class="bi bi-scissors" >Delete page</i></Button></th>
@@ -160,7 +184,7 @@ function PageForm(props){
     </Table>:<></>}
     <Form onSubmit={handleSubmit}>
     <Card>
-    {props.user.role=='admin'?
+    {props?.user?.role=='admin'?
     <Form.Group className='mb-3'>
         <Form.Label>Author</Form.Label>
         <Form.Control type="text" minLength={2} required={true} value={author} onChange={(event) => setAuthor(event.target.value)}></Form.Control>

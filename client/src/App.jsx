@@ -14,8 +14,7 @@ import API from './API'
 import NotFound from './components/NotFoundComponent';
 import { LoginForm } from './components/AuthComponents';
 import PageForm from "./components/PageFormComponents";
-import context from "react-bootstrap/esm/AccordionContext";
-// import TitleContext from "./components/ContextComponent";
+import { TitleProvider } from './components/ContextComponent';
 
 function App() {
   const [pages,setPages]=useState([]);
@@ -23,20 +22,28 @@ function App() {
   const [message, setMessage] = useState('');
   const [user, setUser]=useState(null)
   const [lastID,setLastId]=useState();
-  const navigate=useNavigate;
-  const title = useContext(context);
 
-  // const [title,setTitle]=useState('')
 
-  // useEffect(()=>{
-  //   //get all the pages from API
-  //   const getTitle=async()=>{
-  //   let titleA= await API.getTitle().then(
-  //   setTitle(titleA));
-  //   }
-  //   //call function that just create now
-  //   getTitle();
-  // },[]);
+  const filterPage=(pag)=>{
+    pag=pag.filter(x=>{
+        const now=dayjs().format("YYYY-MM-DD");
+        const date=dayjs(x.publicationDate).format("YYYY-MM-DD")
+        if(date && date<=now){
+          return true;
+        }
+      })
+     pag = pag.sort(
+        (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
+      );
+     
+     for(const p of pag){
+      p.blocks.sort(
+        (objA, objB) => Number(objA.pos) - Number(objB.pos),
+      )
+     }
+     return pag;
+
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -63,30 +70,35 @@ function App() {
     setLoggedIn(false);
     setUser(null)
     setMessage('');
+    setPages(filterPage(pages))
+
   });
   };
 
   return (
+  <TitleProvider >
   <BrowserRouter>
       <Routes>
+      
         <Route element={
-          <>
           
-           <NavBar user={user} loggedIn={loggedIn} handleLogout={handleLogout}/>
+           <>
+           <NavBar user={user} loggedIn={loggedIn} handleLogout={handleLogout} />
            <Container fluid className='App'>
            {message && <Row>
                   <Alert variant={message.type} onClose={() => setMessage('')} dismissible>{message.msg}</Alert>
                 </Row> }
                 <Outlet/>
            </Container>
-           </>}>
+           </>
+           }>
 
         <Route index
-          element={ <PageTable setPages={setPages} setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
+          element={ <PageTable filterPage={filterPage} setPages={setPages} setLastId={setLastId} pages={pages} loggedIn={loggedIn} user={user}/> } />
         <Route path='/pages' 
-              element={<PageForm setPages={setPages} user={user} />} />
+              element={<PageForm setPages={setPages} user={user} loggedIn={loggedIn}/>} />
         <Route path='/pages/:pageId' 
-          element={<PageForm  user={user}/> } />
+          element={<PageForm  user={user} loggedIn={loggedIn}/> } />
         <Route path='/pages/admin/title'
             element={ <TitleForm/> }
         />
@@ -95,8 +107,13 @@ function App() {
               loggedIn ? <Navigate replace to='/' /> : <LoginForm login={handleLogin} />
             } />
         </Route>
+       
       </Routes>
+     
   </BrowserRouter>
+  </TitleProvider>
+
+ 
       )
 }
 

@@ -1,56 +1,33 @@
-// import React from "react";
-
-// const titleContext=React.createContext({
-//     settings: { title: "CMSmall" },
-//     setTitle: () => new Promise(() => null),
-// });
-
-//  useEffect(()=>{
-//     //get all the pages from API
-//     const getTitle=async()=>{
-//     let titleA= await API.getTitle().then(
-//     setTitle(titleA));
-//     }
-//     //call function that just create now
-//     getTitle();
-//   },[]);
-
-// export default titleContext;
-
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useEffect, useState } from 'react';
 import API from "../API"
+import { Routes } from 'react-router-dom';
 
-const TitleContext = createContext({
-  settings: { title: "CMSmall" },
-  editTitle: () => new Promise(() => null)
-})
+// Create a new context
+const TitleContext = createContext();
 
-export function AuthProvider({ ...props }) {
-  const [settings, setSettings] = useState({})
-  
-  const saveGlobals = async (key, newSettings) => {
-    const data = await API.editTitle(key, newSettings)
-    if (data.error) return data
-    setSettings({ title: newSettings })
-    return data
-  }
+const TitleProvider = ({...props}) => {
+  const [title, setTitle] = useState('');
 
+  useEffect(() => {
+    // Define an async function to fetch the title from the API
+    const getTitle = async () => {
+      try {
+        const editTitle = await API.getTitle()
+        setTitle(editTitle.titleAdmin);
+      } catch (error) {
+        console.error('Error fetching title:', error);
+      }
+    };
+
+    // Call the function to get the title
+    getTitle();
+  }, []);
 
   return (
-    <TitleContext.Provider
-      value={{
-        settings,
-        setGlobals: (key, newSettings) => saveGlobals(key, newSettings),
-      }}
+    <TitleContext.Provider value={title}
       {...props}
-    />
-  )
-}
+   />
+  );
+};
 
-export function useAuth() {
-  const context = useContext(TitleContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
-}
+export { TitleContext, TitleProvider };

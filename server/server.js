@@ -107,14 +107,9 @@ app.get('/api/pages',(req, res)=>{
     res.json(pages)})
   .catch(()=>res.status(500).end());
 });
+
 //GET /api/session/current
 app.get('/api/',async (req, res)=> {
-  // const result= await CMS_dao.getTitle();
-  // if (result.error)
-  //   res.status(400).json(result);
-  // else
-  // //res.send(result);
-  // res.status(201).json(result)
   CMS_dao.getTitle()
   .then(title=>{
     res.json(title)})
@@ -131,24 +126,29 @@ app.post('/api/pages',[
   check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
   check('publicationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
 ],async (req, res)=>{
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({errors: errors.array()});
-  }
+
+const errors = validationResult(req);
+if (!errors.isEmpty()) {
+  return res.status(422).json({errors: errors.array()});
+}
  
   const newPage=req.body;
-  console.log(newPage)
+//control that author name is the same of user in case user is a regular user
+if(req.user.role=='author' && newPage.author!==req.user.name){
+    console.error(`ERROR: ${e.message}`);
+    res.status(401).json({error: 'Not Authorized'});
+}else{
   try{
   const result= await CMS_dao.addPage(newPage);
-  if (result.error)
-    res.status(400).json(result);
-  else
-  //res.send(result);
-  res.status(201).json(result)
+    if (result.error)
+      res.status(400).json(result);
+    else
+      res.status(201).json(result)
   }catch(e){
     console.error(`ERROR: ${e.message}`);
     res.status(503).json({error: 'Impossible to create the page.'});
   }
+}
 });
 
 //PUT /api/pages/<id>
@@ -166,6 +166,10 @@ app.put('/api/pages/:id',[
   const pageToUpdate=req.body;
   const pageId=req.params.id;
 
+if(req.user.role=='author' && pageToUpdate.author!==req.user.name){
+    console.error(`ERROR: ${e.message}`);
+    res.status(401).json({error: 'Not Authorized'});
+}else{
   try{
     const result=await CMS_dao.updatePage(pageToUpdate,pageId) 
     if(result.error)
@@ -175,7 +179,7 @@ app.put('/api/pages/:id',[
   } catch {
     res.status(503).json({'error': `Impossible to update page #${pageId}.`});
   }
-  
+}
 });
 
 app.delete('/api/pages/:id',

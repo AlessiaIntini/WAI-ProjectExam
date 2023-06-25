@@ -9,25 +9,21 @@ import Col from 'react-bootstrap/Col';
 import { useEffect} from 'react'
 import context from 'react-bootstrap/esm/AccordionContext';
 // import TitleContext from "./ContextComponent";
-
+import { TitleContext } from './ContextComponent';
 
 function NavBar(props) {
-  // const [title,setTitle]=useState('CMSmall')
-  const title = useContext(context);
-  // useEffect(()=>{
-  //   //get all the pages from API
-  //   const getTitle=async()=>{
-  //   let titleA= await API.getTitle().then(
-  //   setTitle(titleA));
-  //   }
-  //   //call function that just create now
-  //   getTitle();
-  // },[]);
+  
+  const title = useContext(TitleContext);
+
+  
 
   return (
+    
     <Navbar id="color-nav" expand="sm" variant="light" fixed="top" className="navbar-padding">
     <Navbar.Brand href="index.html">
-    <i className="bi bi-file-earmark"></i><i>CMSmall</i>
+    <Link class="my-own-color" to="/">
+    <i className="bi bi-file-earmark"></i><i>{title}</i>
+    </Link>
     </Navbar.Brand>
     <Nav className="justify-content-end" style={{ width: "100%" }}>
     <Nav.Item>
@@ -47,6 +43,7 @@ function NavBar(props) {
     </Nav.Item>
     </Nav>
 </Navbar>
+
   );
 }
 
