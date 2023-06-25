@@ -124,7 +124,7 @@ const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
 app.get('/api/pages',(req, res)=>{
   CMS_dao.listPages()
   .then(pages=>{
-    res.json(pages)})
+    res.status(200).json(pages)})
   .catch(()=>res.status(500).json(err));
 });
 
@@ -206,17 +206,21 @@ app.delete('/api/pages/:id',
   [ check('id').isInt() ],
   async (req, res) => {
     try {
-     
       const pageToDelete=req.body;
       const pageId=req.params.id;
+      console.log(req.user.name)
+      console.log(req.user.role)
+     
       const result = await CMS_dao.deletePage(pageToDelete,pageId);
       if (result == null)
         return res.status(200).json({}); 
       else
         return res.status(404).json(result);
+      
     } catch (err) {
       res.status(503).json({ error: `Database error during the deletion of page ${req.params.id}: ${err} ` });
-    }
+    
+  }
   }
 );
 /***title APIs ***/
@@ -225,7 +229,7 @@ app.delete('/api/pages/:id',
 /***This route add a title if user is an admin and can change name of website ***/
 app.post('/api/pages/admin/title',
   isLoggedIn,
-[ check('title').notEmpty(),
+[ check('titleAdmin').notEmpty(),
 ],async (req, res)=>{
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -253,7 +257,7 @@ app.post('/api/pages/admin/title',
 app.get('/api/',async (req, res)=> {
   CMS_dao.getTitle()
   .then(title=>{
-    res.json(title)})
+    res.status(200).json(title)})
   .catch(()=>res.status(500).json(err));
 });
 
