@@ -41,9 +41,10 @@ function PageTable(props){
    return(
 
     <Container fluid="xxl">
+    
       <h1>Welcome to CMSMALL!</h1>
       <p className='lead'>We now have {props.pages.length} pages available.</p>
-      
+   
       {!props.loggedIn || props.user==null? <></>:<Link to='/pages'><Button variant="secondary" size="lg" >Add new Page</Button></Link>}
    {props.pages.map((page)=><PageRow setLastId={props.setLastId} pageData={page} key={page.id_p} loggedIn={props.loggedIn} user={props.user}/>)} 
     </Container>
@@ -56,6 +57,9 @@ function PageTable(props){
     let now = dayjs().format("YYYY-MM-DD");
     let date=dayjs(props.pageData.publicationDate).format('YYYY-MM-DD')
   
+    const setId=()=>{
+      props.setLastId(props.pageData.id_p+1)
+    }
       return(
         
         <Row>
@@ -64,9 +68,9 @@ function PageTable(props){
         onClick={() => setOpen(!open)}
         aria-controls="example-collapse-text"
         aria-expanded={open}
-       class="text-left "
+       className="text-left "
       >
-       <h2 onChange={props.setLastId(props.pageData.id_p+1)}>{props.pageData.title}</h2>
+       <h2 onChange={()=>setId()}>{props.pageData.title}</h2>
       </Button>
 
       <Collapse in={open}>
@@ -74,14 +78,14 @@ function PageTable(props){
         <Card.Body>
         <Card.Text align='left'>
         <i >Created by: {props.pageData.author}</i>
-        <Card>
+        </Card.Text>
         {props.pageData.blocks.map((block)=><BlockRow blockData={block} key={block.id_b}/>)} 
-       
-        </Card>
 
-        {!props.pageData.publicationDate ? 'It is a draft':<></>}
-        {props.pageData.publicationDate && date>=now ?'publication of this page is planned in the future on '+date:<></>}
-        {props.pageData.publicationDate && date<now?
+      
+        <Card.Text align='left'>
+        {isNaN(props.pageData.publicationDate) ? 'It is a draft':<></>}
+        {!isNaN(props.pageData.publicationDate) && date>=now ?'publication of this page is planned in the future on '+date:<></>}
+        {!isNaN(props.pageData.publicationDate) && date<now?
         'Publication date: '+date:<></>}
         </Card.Text>
         <table align='center'>
@@ -106,15 +110,17 @@ function BlockRow(props){
   const content=props.blockData.content;
   return(
     <>
-  {props.blockData.type=='header'?<Card.Header><h1>{content}</h1></Card.Header>:<></>}
+  {props.blockData.type=='header'? <Card.Title>{content}</Card.Title>:<></>}
   {props.blockData.type=='image'? <Card.Img variant="top" src={image[content]}/>:<></>}
   
   {props.blockData.type=='paragraph'?
   <Card.Body>
         <blockquote className="blockquote mb-0">
-          <p>{' '}{content}{' '}</p>
+        <p>
+          {' '}{content}{' '}
+          </p>
         </blockquote>
-      </Card.Body>:
+   </Card.Body>:
       <></>
   } 
 

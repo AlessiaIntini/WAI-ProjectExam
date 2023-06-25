@@ -178,11 +178,13 @@ const handleSubmit=async (event)=>{
     {waiting && <Alert variant="secondary">Please, wait for the server's answer...</Alert>}
     {isWrong&&<Alert variant="danger" onClose={() => setIsWrong(false)}>Number of blocks are wrog, add other blocks or return to home page</Alert> }
     {editablePage?<Table>
+    <tbody>
       <tr>
         <th><Button variant='danger' onClick={()=>handleDelete()} ><i class="bi bi-scissors" >Delete page</i></Button></th>
       </tr>
+    </tbody>
     </Table>:<></>}
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit}  noValidate>
     <Card>
     {props?.user?.role=='admin'?
     <Form.Group className='mb-3'>
@@ -200,7 +202,7 @@ const handleSubmit=async (event)=>{
       </Form.Group>
       <Form.Group className='mb-3'>
         <Form.Label>Publication Date</Form.Label>
-        <Form.Control type="date" value={publicationDate} onChange={(event) => setpublicationDate(dayjs(event.target.value).format("YYYY-MM-DD"))}></Form.Control>
+        <Form.Control type="date" required={false}  value={publicationDate} onChange={(event) => setpublicationDate(editablePage && isNaN(publicationDate)? event.target.value: dayjs(event.target.value).format("YYYY-MM-DD"))}></Form.Control>
       </Form.Group>
       {editablePage ? 
         <><Button variant="primary" type="submit">Update</Button> <Link to='../..' relative='path' className='btn btn-danger'>Cancel</Link></> :
@@ -275,7 +277,7 @@ const handleSubmit=async (event)=>{
       </Col>:<></>}
 
       <br/>
-      <Button variant="primary" onClick={()=>handleSubmitBlock()}>Add</Button>
+      <Button variant="primary" type="reset" onClick={()=>handleSubmitBlock()}>Add</Button>
       <br/><br/><br/><br/>
       {isShown && 
       <Table>
@@ -289,8 +291,8 @@ const handleSubmit=async (event)=>{
 
         </tr>
       </thead>
-      {blocks.map((block)=><BlockOutput handleSwap={handleSwap} setDeleteBlocks={setDeleteBlocks} editablePage={editablePage} blockData={block} key={block.id_b}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
-      {editablePage? newBlocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} key={block.id_b} blockData={block} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>) :<></>}
+      {blocks.map((block)=><BlockOutput handleSwap={handleSwap} setDeleteBlocks={setDeleteBlocks} editablePage={editablePage} blockData={block} key={block.pos}  id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>)}
+      {editablePage? newBlocks.map((block)=><BlockOutput setDeleteBlocks={setDeleteBlocks} key={block.pos} blockData={block} id_p={id_p} setContent={setContent} setEditableBlock={setEditableBlock}/>) :<></>}
       </Table>
       }
 
@@ -335,7 +337,7 @@ function BlockOutput(props){
       <tr>
       <th>{props.blockData.type}</th>
     {props.blockData.type=='header'?<th> <Form.Control type="text" minLength={2} required={true} value={changeContent} onChange={(event) => setChangeContent(event.target.value)}></Form.Control></th>:<></>}
-    {props.blockData.type=='image'? <th><Card.Img src={image[content]} fluid />
+    {props.blockData.type=='image'? <th><Card.Img src={image[content]}  />
     <Col md>
         <FloatingLabel
           controlId="floatingSelectGrid"

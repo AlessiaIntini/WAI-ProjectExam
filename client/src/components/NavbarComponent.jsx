@@ -8,20 +8,27 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useEffect} from 'react'
 import context from 'react-bootstrap/esm/AccordionContext';
-// import TitleContext from "./ContextComponent";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
+
 import { TitleContext } from './ContextComponent';
 
 function NavBar(props) {
   
   const title = useContext(TitleContext);
 
+  const renderTooltip = (obj) => (
+    <Tooltip id="button-tooltip" {...obj}>
+      {props?.user?.role}
+    </Tooltip>
+  );
   
 
   return (
     
     <Navbar id="color-nav" expand="sm" variant="light" fixed="top" className="navbar-padding">
-    <Navbar.Brand href="index.html">
-    <Link class="my-own-color" to="/">
+    <Navbar.Brand>
+    <Link className="my-own-color" to="/">
     <i className="bi bi-file-earmark"></i><i>{title}</i>
     </Link>
     </Navbar.Brand>
@@ -30,8 +37,19 @@ function NavBar(props) {
     <Container fluid>
     <Row>
     <Col md="auto">
+    <Navbar.Text>
+    <OverlayTrigger
+      placement="left"
+      delay={{ show: 250, hide: 400 }}
+      overlay={renderTooltip}
+    >
+     {props.loggedIn&& props.user!==null? <Button variant="outline-dark">Login as: {props?.user?.name}</Button>  :<></>}
+    </OverlayTrigger>
+         
+    </Navbar.Text>
+    </Col>
+    <Col md="auto">
     {props.loggedIn && props?.user?.role=='admin'? <Link to={`pages/admin/title`} className='btn btn-outline-light' ><i class="bi bi-pencil-square"></i></Link>:<></>}
-   
     </Col>
     <Col xs lg="2">
     {!props.loggedIn ?  <Link to='/login' className='btn btn-outline-light'>Login</Link>:

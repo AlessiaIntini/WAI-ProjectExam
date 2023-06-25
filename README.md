@@ -178,8 +178,10 @@
 
 ## Users Credentials
 
-- marco@polito.it, password (author of three pages)
+- marco@polito.it, password (author of three pages. One is published, one is a draft and one will be published in the future)
+
 -luigi@polito.it , password (author of no page)
 -alessia@polito.it , password (she is an admin)
--paolo@polito.it, password (author of three pages)
--luca@polito.it, password (author of three pages)
+-paolo@polito.it, password (author of two pages. One is published and  one will be published in the future)
+
+-luca@polito.it, password (author of two pages, one is a draft and one is published)

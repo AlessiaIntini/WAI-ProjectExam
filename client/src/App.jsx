@@ -33,7 +33,7 @@ function App() {
         }
       })
      pag = pag.sort(
-        (objA, objB) => Number(objB.creationDate) - Number(objA.creationDate),
+        (objA, objB) => Number(objB.publicationDate) - Number(objA.publicationDate),
       );
      
      for(const p of pag){
@@ -84,7 +84,7 @@ function App() {
           
            <>
            <NavBar user={user} loggedIn={loggedIn} handleLogout={handleLogout} />
-           <Container fluid className='App'>
+           <Container fluid >
            {message && <Row>
                   <Alert variant={message.type} onClose={() => setMessage('')} dismissible>{message.msg}</Alert>
                 </Row> }

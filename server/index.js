@@ -4,15 +4,14 @@ const dayjs=require('dayjs')
 const express = require('express');
 const morgan = require('morgan'); // Middleware for logging messages
 const cors = require('cors'); // Middleware to enable CORS support
+
 const {check, validationResult} = require('express-validator'); // Middleware for validation
 
 // DAO and Database Init
-const CMS_dao = require("./CMS-dao");
- const userDao = require("./user-dao");
+const CMS_dao = require("./CMS-dao");//module for accessing the pages table in the DB
+const userDao = require("./user-dao");//module for accessing the user table in the DB
 
-//Passport-related imports
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
+
 const session = require("express-session");
 
 // init express
@@ -22,6 +21,7 @@ const port = 3001;
 // set up the middlewares
 app.use(express.json()); // for parsing json request body
 app.use(morgan("dev"));
+
 // set up and enable cors
 const corsOptions = {
   origin: "http://localhost:5173",
@@ -29,8 +29,11 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+//Passport-related imports
+const passport = require("passport"); //authentication middleware
+const LocalStrategy = require("passport-local"); //authentication strategy(username and password)
 
-// Passport: set up local strategy
+// Passport: set up local strategy to search in the DB a user with matching password
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
   const user = await userDao.getUser(username, password);
   if(!user)
@@ -39,15 +42,29 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
   return cb(null, user);
 }));
 
+// Serializing in the session the user object given from LocalStrategy(verify).
 passport.serializeUser(function (user, cb) {
   cb(null, user);
 });
 
-passport.deserializeUser(function (user, cb) { // this user is id + email + name
-  return cb(null, user);
-  // if needed, we can do extra check here (e.g., double check that the user is still in the database, etc.)
+// Starting from the data in the session, we extract the current (logged-in) user.
+passport.deserializeUser(function (user, cb) { 
+  //double check that user is still in User db
+  return userDao.getUserById(user.id)
+  .then(user => cb(null, user))
+  .catch(err => callback(err, null));
 });
 
+//creating the session
+app.use(session({
+  secret: "shhhhh... it's a secret!",
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(passport.authenticate('session'));
+
+//authentication verification of log in
 const isLoggedIn = (req, res, next) => {
   if(req.isAuthenticated()) {
     return next();
@@ -56,24 +73,18 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json({error: 'Not authorized'});
 }
 
-app.use(session({
-  secret: "shhhhh... it's a secret!",
-  resave: false,
-  saveUninitialized: false,
-}));
-app.use(passport.authenticate('session'));
-
+/***API for Users and log in ***/
 
 // POST /api/sessions
+//This route that is used for performing login
 app.post('/api/sessions', function(req, res, next) {
   passport.authenticate('local', (err, user, info) => {
     if (err)
       return next(err);
       if (!user) {
-        // display wrong login messages
         return res.status(401).send(info);
       }
-      // success, perform the login
+   
       req.login(user, (err) => {
         if (err)
           return next(err);
@@ -84,7 +95,9 @@ app.post('/api/sessions', function(req, res, next) {
   })(req, res, next);
 });
 
+
 // GET /api/sessions/current
+//This route check if the user is logged in or not
 app.get('/api/sessions/current', (req, res) => {
   if(req.isAuthenticated()) {
     res.json(req.user);}
@@ -93,75 +106,79 @@ app.get('/api/sessions/current', (req, res) => {
 });
 
 // DELETE /api/session/current
+//This route checks that user is logged in or not
 app.delete('/api/sessions/current', (req, res) => {
   req.logout(() => {
     res.end();
   });
 });
 
-//ROUTES
+const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+  return `${location}[${param}]: ${msg}`;
+};
+
+/*** Pages APIs ***/
+
 //GET /api/pages
+//This route return all pages in db
 app.get('/api/pages',(req, res)=>{
   CMS_dao.listPages()
   .then(pages=>{
     res.json(pages)})
-  .catch(()=>res.status(500).end());
+  .catch(()=>res.status(500).json(err));
 });
 
-//GET /api/session/current
-app.get('/api/',async (req, res)=> {
-  CMS_dao.getTitle()
-  .then(title=>{
-    res.json(title)})
-  .catch(()=>res.status(500).end());
-});
 
 
 
 //POST /api/pages
-app.post('/api/pages',[
+//This route add a new page to db
+app.post('/api/pages',
   isLoggedIn,
-  check('title').notEmpty(),
+[
+  check('title').isLength({min: 1, max:160}),
   check('author').notEmpty(),
-  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
-  check('publicationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
-],async (req, res)=>{
-
-const errors = validationResult(req);
-if (!errors.isEmpty()) {
-  return res.status(422).json({errors: errors.array()});
-}
- 
+  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
+],
+async (req, res)=>{
+  const errors = validationResult(req).formatWith(errorFormatter);;
+  if (!errors.isEmpty()) {
+    return res.status(422).json({errors: errors.array().join(", ")});
+  }
   const newPage=req.body;
-//control that author name is the same of user in case user is a regular user
-if(req.user.role=='author' && newPage.author!==req.user.name){
+  /***control that author name is the same of user in case user 
+  * is a regular user and he can't change name of author***/
+  if(req.user.role=='author' && newPage.author!==req.user.name){
     console.error(`ERROR: ${e.message}`);
     res.status(401).json({error: 'Not Authorized'});
-}else{
-  try{
-  const result= await CMS_dao.addPage(newPage);
-    if (result.error)
-      res.status(400).json(result);
-    else
-      res.status(201).json(result)
-  }catch(e){
-    console.error(`ERROR: ${e.message}`);
-    res.status(503).json({error: 'Impossible to create the page.'});
   }
-}
+  else{
+    try{
+      const result= await CMS_dao.addPage(newPage);
+      if (result.error)
+        res.status(400).json(result);
+      else
+        res.status(201).json(result)
+    }catch(e){
+      console.error(`ERROR: ${e.message}`);
+      res.status(503).json({error: 'Impossible to create the page, there is database error during the creation of new Page'});
+    }
+  }
 });
 
 //PUT /api/pages/<id>
-app.put('/api/pages/:id',[
-  //isLoggedIn,
-  check('title').notEmpty(),
+/**This route allows to modify a page, specifiyng its id and title,
+ *author and creationDate cannot be empty, only publicationDate can be*/
+app.put('/api/pages/:id',
+  isLoggedIn,
+ [
+  check('title').isLength({min: 1, max:160}),
   check('author').notEmpty(),
-  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true}),
-  check('publicationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
+  check('creationDate').isDate({format: 'YYYY-MM-DD', strictMode: true})
 ],async (req,res)=>{
-  const errors = validationResult(req);
+  const errors = validationResult(req).formatWith(errorFormatter);
   if (!errors.isEmpty()) {
-    return res.status(422).json({errors: errors.array()});
+    return res.status(422).json({errors: errors.array().join(", ")});
   }
   const pageToUpdate=req.body;
   const pageId=req.params.id;
@@ -182,12 +199,14 @@ if(req.user.role=='author' && pageToUpdate.author!==req.user.name){
 }
 });
 
+//DELETE /api/pages/:id
+/***Given a page id, This route deletes page  ***/
 app.delete('/api/pages/:id',
   isLoggedIn,
   [ check('id').isInt() ],
   async (req, res) => {
     try {
-      // NOTE: if there is no film with the specified id, the delete operation is considered successful.
+     
       const pageToDelete=req.body;
       const pageId=req.params.id;
       const result = await CMS_dao.deletePage(pageToDelete,pageId);
@@ -200,32 +219,43 @@ app.delete('/api/pages/:id',
     }
   }
 );
+/***title APIs ***/
 
 //POST /api/pages/title
-app.post('/api/pages/admin/title',[
-  //isLoggedIn
+/***This route add a title if user is an admin and can change name of website ***/
+app.post('/api/pages/admin/title',
+  isLoggedIn,
+[ check('title').notEmpty(),
 ],async (req, res)=>{
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({errors: errors.array()});
   }
-  //if(req.user.role==='admin'){
+  if(req.user.role==='admin'){
     const titleUp=req.body;
   try{
   const result= await CMS_dao.editTitle(titleUp);
   if (result.error)
     res.status(400).json(result);
   else
-  //res.send(result);
   res.status(201).json(result)
   }catch(e){
     console.error(`ERROR: ${e.message}`);
     res.status(503).json({error: 'Impossible to create the page.'});
   }
-// }else 
-//   res.status(401)
+ }else 
+    res.status(401).json({error:'Not authorized'})
 });
 
+
+//GET /api
+//This route return title of the website
+app.get('/api/',async (req, res)=> {
+  CMS_dao.getTitle()
+  .then(title=>{
+    res.json(title)})
+  .catch(()=>res.status(500).json(err));
+});
 
 
 app.listen(port, () => 'API server started');

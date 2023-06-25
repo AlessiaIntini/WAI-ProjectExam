@@ -32,7 +32,7 @@ exports.getUser = (email, password) => {
 
 exports.getUserById = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = 'SELECT * FROM user WHERE id = ?';
+    const sql = 'SELECT * FROM User WHERE id_u = ?';
     db.get(sql, [id], (err, row) => {
       if (err) { 
         reject(err); 

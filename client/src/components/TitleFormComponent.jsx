@@ -22,7 +22,7 @@ function TitleForm(props) {
         <Form.Control type="text" minLength={2} required={true} value={titleP} onChange={(event) => setTitleP(event.target.value)}></Form.Control>
         </Form.Group>
         <><Button variant="primary" type="submit" >Set</Button> 
-        <Link to='..' relative='path' className='btn btn-danger'>Cancel</Link></>
+        <Link to='/' relative='path' className='btn btn-danger'>Cancel</Link></>
         </Form>
 
     )

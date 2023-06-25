@@ -28,10 +28,6 @@ exports.listPages = () => {
           .filter((c) => c.id_page === row.id_p)
           .map((block) => new Block(block.id_b,block.type,block.content,block.page_id,block.pos)
            );
-          // .reduce((p1,p2)=> p1.page_id === p2.page_id ? p1.blocks.push(new Block(p2.id_b,p2.type,p2.content,p2.page_id)):{ })
-        
-      //const pages = rows.map((p) => new Page(p.id_p,p.title,p.author,p.creationDate,p.publicationDate,new Block(p.id_b,p.type,p.content,p.id_page)));
-      
       const page=new Page(row.id_p,row.title,row.author,row.creationDate,row.publicationDate,b)
       return page
     })
@@ -68,7 +64,7 @@ exports.addPage = (page) => {
 //update an existing page
 exports.updatePage=(page,pageId)=>{
   return new Promise ((resolve, reject) => {
-    const sql = 'UPDATE page SET  title=?, author=?, creationDate=DATE(?),  publicationDate=DATE(?) WHERE id_p=?';
+    const sql = 'UPDATE Page SET  title=?, author=?, creationDate=DATE(?),  publicationDate=DATE(?) WHERE id_p=?';
     db.run(sql, [page.title,page.author,page.creationDate, page.publicationDate, pageId], function(err) {
 
       if(err) {
@@ -92,7 +88,9 @@ exports.updatePage=(page,pageId)=>{
     }
     if(page?.deleteBlocks?.length>0){
       for(const block of page.deleteBlocks ){
+        exports.deleteBlocksByContent(block)
         exports.deleteBlocksById(block.id_b)
+        
       }
     }
 
@@ -121,7 +119,7 @@ exports.deletePage=(page,pageId)=>{
 
     exports.deleteBlocksByPageid(pageId)
 
-    const sql = 'DELETE FROM page WHERE id_p=?';
+    const sql = 'DELETE FROM Page WHERE id_p=?';
     db.run(sql, [pageId], function (err) {
       if (err) {
         reject(err);
@@ -147,7 +145,7 @@ exports.addBlock=(block,pageId)=>{
 //delete block
 exports.deleteBlocksByPageid=(pageId)=>{
   return new Promise((resolve, reject) => {
-    const sql = 'DELETE FROM block WHERE page_id=?';
+    const sql = 'DELETE FROM Block WHERE page_id=?';
     db.run(sql, [pageId], function (err) {
       if (err) {
         reject(err);
@@ -159,20 +157,30 @@ exports.deleteBlocksByPageid=(pageId)=>{
 
 exports.deleteBlocksById=(blockId)=>{
   return new Promise((resolve, reject) => {
-    const sql = 'DELETE FROM block WHERE id_b=?';
+    const sql = 'DELETE FROM Block WHERE id_b=?';
     db.run(sql, [blockId], function (err) {
       if (err) {
         reject(err);
       }
     });
   });
+}
 
+exports.deleteBlocksByContent=(block)=>{
+  return new Promise((resolve, reject) => {
+    const sql = 'DELETE FROM Block WHERE page_id=? AND type=? AND content=?';
+    db.run(sql, [block.page_id,block.type,block.content], function (err) {
+      if (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 //update block
 exports.updateBlock=(block,blockId)=>{
   return new Promise ((resolve, reject) => {
-    const sql = 'UPDATE block SET content=? WHERE id_b=?';
+    const sql = 'UPDATE Block SET content=? WHERE id_b=?';
     db.run(sql, [block.content, blockId], function(err) {
       if(err) {
         console.log(err);
@@ -187,7 +195,7 @@ exports.updateBlock=(block,blockId)=>{
 //update position block in page
 exports.updatePositionBlock=(block,blockId)=>{
   return new Promise ((resolve, reject) => {
-    const sql = 'UPDATE block SET pos=? WHERE id_b=?';
+    const sql = 'UPDATE Block SET pos=? WHERE id_b=?';
     db.run(sql, [block.pos, blockId], function(err) {
       if(err) {
         console.log(err);
@@ -214,7 +222,7 @@ exports.getTitle=()=>{
 //update title
 exports.editTitle=(title,id)=>{
   return new Promise ((resolve, reject) => {
-    const sql1 = 'UPDATE title SET titleAdmin=? WHERE id=?';
+    const sql1 = 'UPDATE Title SET titleAdmin=? WHERE id=?';
       db.run(sql1, [title.titleAdmin,1], (err, row) => {
         if (err) {
           reject(err);
